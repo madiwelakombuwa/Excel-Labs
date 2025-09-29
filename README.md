@@ -40,7 +40,7 @@ Using this function, you can test the benefits of generative AI directly in Exce
 
 See [LABS.GENERATIVEAI](/labs-generative-ai/README.md) for more information.
 
-### Agent Mode (Frontier)
+## Agent Mode (Frontier)
 Agent Mode brings a new way to work with Excel by combining natural language with Excel’s most powerful tools. Instead of handling every step yourself, you can describe what you want, like reshaping data, building reports, or creating dashboards, and Agent Mode will plan, execute, and refine the work directly in your workbook.
 
 **What it does:**
