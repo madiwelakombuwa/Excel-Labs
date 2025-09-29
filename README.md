@@ -6,6 +6,7 @@ Excel Labs currently includes two features:
 
 1. Advanced formula environment: An interface designed for authoring, editing, and reusing formulas.
 1. `LABS.GENERATIVEAI`: A custom function that enables you to send prompts to a generative AI model and return the responses directly to the grid. This is not part of Microsoft 365 Copilot.
+1. Excel Agent Mode: A new way to work with Excel by combining natural language with Excel’s most powerful tools. Describe what you want and Agent Mode will plan, execute, and refine the work directly in your workbook.
 
 The [Microsoft Garage](https://garage.microsoft.com) is an outlet for experimental projects for you to try.
 
