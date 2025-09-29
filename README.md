@@ -39,6 +39,22 @@ Using this function, you can test the benefits of generative AI directly in Exce
 
 See [LABS.GENERATIVEAI](/labs-generative-ai/README.md) for more information.
 
+### Agent Mode (Frontier)
+Agent Mode brings a new way to work with Excel by combining natural language with Excel’s most powerful tools. Instead of handling every step yourself, you can describe what you want, like reshaping data, building reports, or creating dashboards, and Agent Mode will plan, execute, and refine the work directly in your workbook.
+
+**What it does:**
+- Handles complex, multi-step tasks such as merging sheets, generating tables, charts, and PivotTables, or applying advanced formatting.
+- Uses Excel’s native features, so everything remains fully editable and refreshable.
+- Iterates until results align with your intent, while you stay in control.
+
+**Best for:** Scenarios that require reasoning and multiple actions, like financial modeling, data transformation, or building interactive reports.  
+**Where:** Available today in Excel for the web through the Excel Labs add-in (Frontier program). Support for additional platforms is coming soon.  
+**Notes:**
+- English only for now; performance and features may evolve during preview.
+- Works exclusively on the open workbook; no external data connections, web search, or enterprise search support yet.
+
+See [Agent Mode Support](https://aka.ms/AgentModeExcelSupport) for more information.
+
 ## Platform support
 
 Excel Labs works in Excel for Desktop, Mac, and on the web, without installing any additional software. To get started, install the add-in from the Office Store.
