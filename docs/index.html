@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Excel Labs - Microsoft Garage Project</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>Excel Labs</h1>
+            <p class="subtitle">A Microsoft Garage Project</p>
+        </div>
+    </header>
+
+    <nav>
+        <div class="container">
+            <a href="#about">About</a>
+            <a href="#features">Features</a>
+            <a href="#advanced-formula">Advanced Formula Environment</a>
+            <a href="#generative-ai">LABS.GENERATIVEAI</a>
+            <a href="#agent-mode">Agent Mode</a>
+            <a href="#get-started">Get Started</a>
+        </div>
+    </nav>
+
+    <main class="container">
+        <section id="about">
+            <h2>About Excel Labs</h2>
+            <p>Excel Labs is an Office Add-in for Excel that allows the Excel team to release experimental Excel features and gather customer feedback about them. Although some of these features may never be incorporated into Excel, this experimentation and feedback is vital.</p>
+            <p>The <a href="https://garage.microsoft.com" target="_blank">Microsoft Garage</a> is an outlet for experimental projects for you to try.</p>
+        </section>
+
+        <section id="features">
+            <h2>Current Features</h2>
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <h3>1. Advanced Formula Environment</h3>
+                    <p>An interface designed for authoring, editing, and reusing formulas.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>2. LABS.GENERATIVEAI</h3>
+                    <p>A custom function that enables you to send prompts to a generative AI model and return responses directly to the grid.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>3. Excel Agent Mode</h3>
+                    <p>A new way to work with Excel by combining natural language with Excel's most powerful tools.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="advanced-formula">
+            <h2>Advanced Formula Environment</h2>
+            <p>Advanced formula environment makes it easy to create, edit, and reuse formulas and named LAMBDA functions.</p>
+
+            <h3>Key Features</h3>
+            <ul>
+                <li>Write formulas using an editor that supports inline errors, IntelliSense, comments, and more</li>
+                <li>Indent formulas, making them easier to read</li>
+                <li>Edit modules of named formulas using a single code editor</li>
+                <li>Quickly reuse LAMBDA formulas by importing them from GitHub gists, or by copying them from other workbooks</li>
+            </ul>
+
+            <div class="capabilities">
+                <h3>Capabilities</h3>
+                <div class="capability-grid">
+                    <div class="capability">
+                        <h4>Grid View</h4>
+                        <p>Display and format the currently selected cell's formula</p>
+                    </div>
+                    <div class="capability">
+                        <h4>Name Manager</h4>
+                        <p>Manage names defined in the workbook (functions, ranges, formulas)</p>
+                    </div>
+                    <div class="capability">
+                        <h4>Named Function Editor</h4>
+                        <p>Define named functions using a friendly editor</p>
+                    </div>
+                    <div class="capability">
+                        <h4>Modules</h4>
+                        <p>Organize collections of named formulas as modules</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="generative-ai">
+            <h2>LABS.GENERATIVEAI Function</h2>
+            <p>With the announcement of <a href="https://blogs.microsoft.com/blog/2023/03/16/introducing-microsoft-365-copilot-your-copilot-for-work/" target="_blank">Microsoft 365 Copilot</a>, we see great potential in the power of generative AI. <code>LABS.GENERATIVEAI</code> is a custom function that enables you to send prompts to a generative AI model and return the responses to the Excel grid.</p>
+
+            <div class="note">
+                <strong>Note:</strong> <code>LABS.GENERATIVEAI</code> is not part of Microsoft 365 Copilot but rather a place for you to play and experiment with generative AI today within the Garage framework.
+            </div>
+
+            <h3>Use Cases</h3>
+            <ul>
+                <li>Analyze public information</li>
+                <li>Process data and define the format</li>
+                <li>Answer factual or creative questions</li>
+                <li>Produce a response based on a sample</li>
+            </ul>
+
+            <p><code>LABS.GENERATIVEAI</code> allows you to reference other cells in your workbook, and it can be called inside any Excel cell or named formula in the workbook.</p>
+        </section>
+
+        <section id="agent-mode">
+            <h2>Agent Mode (Frontier)</h2>
+            <p>Agent Mode brings a new way to work with Excel by combining natural language with Excel's most powerful tools. Instead of handling every step yourself, you can describe what you want, like reshaping data, building reports, or creating dashboards, and Agent Mode will plan, execute, and refine the work directly in your workbook.</p>
+
+            <h3>What it does</h3>
+            <ul>
+                <li>Handles complex, multi-step tasks such as merging sheets, generating tables, charts, and PivotTables, or applying advanced formatting</li>
+                <li>Uses Excel's native features, so everything remains fully editable and refreshable</li>
+                <li>Iterates until results align with your intent, while you stay in control</li>
+            </ul>
+
+            <div class="info-box">
+                <h3>Details</h3>
+                <p><strong>Best for:</strong> Scenarios that require reasoning and multiple actions, like financial modeling, data transformation, or building interactive reports.</p>
+                <p><strong>Where:</strong> Available today in Excel for the web through the Excel Labs add-in (Frontier program). Support for additional platforms is coming soon.</p>
+                <p><strong>Notes:</strong></p>
+                <ul>
+                    <li>English only for now; performance and features may evolve during preview</li>
+                    <li>Works exclusively on the open workbook; no external data connections, web search, or enterprise search support yet</li>
+                </ul>
+            </div>
+
+            <p><a href="https://aka.ms/AgentModeExcelSupport" target="_blank">Learn more about Agent Mode Support</a></p>
+        </section>
+
+        <section id="get-started">
+            <h2>Get Started</h2>
+            <div class="platform-support">
+                <h3>Platform Support</h3>
+                <p>Excel Labs works in Excel for Desktop, Mac, and on the web, without installing any additional software.</p>
+            </div>
+
+            <div class="cta">
+                <h3>Install Excel Labs</h3>
+                <p>To get started, install the add-in from the Office Store:</p>
+                <a href="https://aka.ms/get-afe" class="button" target="_blank">Get Advanced Formula Environment</a>
+            </div>
+
+            <div class="resources">
+                <h3>Resources</h3>
+                <ul>
+                    <li><a href="https://github.com/microsoft/Excel-Labs" target="_blank">GitHub Repository</a></li>
+                    <li><a href="https://aka.ms/AgentModeExcelSupport" target="_blank">Agent Mode Support</a></li>
+                    <li><a href="https://garage.microsoft.com" target="_blank">Microsoft Garage</a></li>
+                </ul>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; Microsoft Corporation. Excel Labs is a Microsoft Garage project.</p>
+            <p>
+                <a href="https://github.com/microsoft/Excel-Labs" target="_blank">GitHub</a> |
+                <a href="https://opensource.microsoft.com/codeofconduct/" target="_blank">Code of Conduct</a> |
+                <a href="https://www.microsoft.com/legal/intellectualproperty/trademarks/usage/general" target="_blank">Trademark Guidelines</a>
+            </p>
+        </div>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,12 @@
+{
+  "name": "excel-labs-site",
+  "version": "1.0.0",
+  "description": "Static documentation site for Excel Labs",
+  "scripts": {
+    "dev": "npx wrangler pages dev docs --port 8080",
+    "deploy": "npx wrangler pages deploy docs --project-name=excel-labs"
+  },
+  "keywords": ["excel", "microsoft", "documentation"],
+  "author": "Microsoft",
+  "license": "MIT"
+}

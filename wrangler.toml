@@ -1,0 +1,6 @@
+# Cloudflare Pages configuration
+name = "excel-labs"
+compatibility_date = "2025-01-01"
+
+[site]
+bucket = "./docs"
