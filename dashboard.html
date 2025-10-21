@@ -205,7 +205,7 @@
         </div>
     </nav>
 
-    <!-- Looker Studio Dashboard for user1 and user2 -->
+    <!-- Dashboard container for all users (admin: React dashboard, user1/user2: Looker Studio) -->
     <div id="lookerStudioContainer" class="looker-studio-container">
         <!-- Iframe will be loaded dynamically via JavaScript -->
     </div>
@@ -296,7 +296,15 @@
             const lookerContainer = document.getElementById('lookerStudioContainer');
             const defaultContent = document.getElementById('defaultContent');
 
-            // Get dashboard URL from server (requires authentication)
+            // Check if user is admin - load React dashboard
+            if (user.username === 'admin') {
+                createDashboardIframe(lookerContainer, 'admin-dashboard.html');
+                lookerContainer.classList.add('active');
+                defaultContent.classList.add('hidden');
+                return;
+            }
+
+            // For user1 and user2, get dashboard URL from server (requires authentication)
             const dashboardUrl = await getDashboardUrl();
 
             if (dashboardUrl) {
