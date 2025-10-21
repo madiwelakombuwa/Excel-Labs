@@ -4,14 +4,16 @@
 // Secure dashboard URLs stored on server-side only
 const DASHBOARD_URLS = {
     'user1': 'https://lookerstudio.google.com/embed/reporting/119d56c0-7d73-4bb0-8fb9-d67a5a41361c/page/ecoJD',
-    'user2': 'https://lookerstudio.google.com/embed/reporting/e8a53377-0277-49c2-adb0-f6529163757b/page/gZbyC'
+    'user2': 'https://lookerstudio.google.com/embed/reporting/e8a53377-0277-49c2-adb0-f6529163757b/page/gZbyC',
+    'Accounting': 'https://docs.google.com/spreadsheets/d/1MOi94WoHSk5N0ooItm4aWQ8-3vfRiLi5HG4_fdCzl7s/template/preview'
 };
 
 // Dummy users database (in production, this would be in a real database)
 const USERS = {
     'admin': { password: 'admin123', fullName: 'Administrator', role: 'Admin' },
     'user1': { password: 'password1', fullName: 'John Doe', role: 'User' },
-    'user2': { password: 'password2', fullName: 'Jane Smith', role: 'User' }
+    'user2': { password: 'password2', fullName: 'Jane Smith', role: 'User' },
+    'Accounting': { password: 'password123', fullName: 'Accounting Manager', role: 'Accounting' }
 };
 
 // Simple session token validation
