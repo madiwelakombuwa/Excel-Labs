@@ -193,6 +193,148 @@
         .default-content.hidden {
             display: none;
         }
+
+        /* Admin Terminal CLI Styles */
+        .admin-terminal-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: #0D1117;
+            color: #33FF00;
+            border: 2px solid #33FF00;
+            padding: 12px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: 'Monaco', 'Menlo', 'Consolas', 'Courier New', monospace;
+            font-size: 12px;
+            box-shadow: 0 0 20px rgba(51, 255, 0, 0.3);
+            z-index: 1000;
+            transition: all 0.3s;
+            display: none;
+        }
+
+        .admin-terminal-btn.show {
+            display: block;
+        }
+
+        .admin-terminal-btn:hover {
+            background: #33FF00;
+            color: #000000;
+            box-shadow: 0 0 30px rgba(51, 255, 0, 0.5);
+        }
+
+        .terminal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 2000;
+            overflow-y: auto;
+        }
+
+        .terminal-overlay.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .admin-terminal {
+            background: #0D1117;
+            border: 2px solid #33FF00;
+            border-radius: 4px;
+            box-shadow: 0 0 30px rgba(51, 255, 0, 0.5);
+            width: 100%;
+            max-width: 900px;
+            max-height: 80vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .terminal-titlebar {
+            background: #000000;
+            color: #33FF00;
+            padding: 12px 20px;
+            border-bottom: 1px solid #33FF00;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .terminal-titlebar h3 {
+            font-size: 14px;
+            font-weight: normal;
+            letter-spacing: 1px;
+        }
+
+        .terminal-close {
+            background: transparent;
+            border: 1px solid #33FF00;
+            color: #33FF00;
+            padding: 4px 12px;
+            cursor: pointer;
+            font-family: 'Monaco', 'Menlo', 'Consolas', 'Courier New', monospace;
+            font-size: 11px;
+        }
+
+        .terminal-close:hover {
+            background: #33FF00;
+            color: #000000;
+        }
+
+        .terminal-body {
+            padding: 20px;
+            overflow-y: auto;
+            flex: 1;
+            font-family: 'Monaco', 'Menlo', 'Consolas', 'Courier New', monospace;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        .terminal-output-line {
+            color: #33FF00;
+            margin-bottom: 5px;
+        }
+
+        .terminal-output-line.error {
+            color: #FF3333;
+        }
+
+        .terminal-output-line.success {
+            color: #33FF00;
+            text-shadow: 0 0 10px rgba(51, 255, 0, 0.5);
+        }
+
+        .terminal-output-line.info {
+            color: #00DD00;
+        }
+
+        .terminal-input-container {
+            display: flex;
+            align-items: center;
+            padding: 10px 20px;
+            background: #000000;
+            border-top: 1px solid #006600;
+        }
+
+        .terminal-prompt-symbol {
+            color: #00DD00;
+            margin-right: 8px;
+        }
+
+        .terminal-cli-input {
+            background: transparent;
+            border: none;
+            color: #33FF00;
+            font-family: 'Monaco', 'Menlo', 'Consolas', 'Courier New', monospace;
+            font-size: 13px;
+            outline: none;
+            flex: 1;
+            caret-color: #33FF00;
+        }
     </style>
 </head>
 <body>
@@ -231,6 +373,36 @@
             <div class="feature-card">
                 <h3>Secure Access</h3>
                 <p>Role-based access control ensures you see only the dashboards and data relevant to your position.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Terminal Button -->
+    <button id="adminTerminalBtn" class="admin-terminal-btn" onclick="openAdminTerminal()">
+        ADMIN TERMINAL
+    </button>
+
+    <!-- Admin Terminal Overlay -->
+    <div id="terminalOverlay" class="terminal-overlay">
+        <div class="admin-terminal">
+            <div class="terminal-titlebar">
+                <h3>ADMIN TERMINAL - USER MANAGEMENT</h3>
+                <button class="terminal-close" onclick="closeAdminTerminal()">CLOSE [ESC]</button>
+            </div>
+            <div id="terminalBodyOutput" class="terminal-body">
+                <div class="terminal-output-line">User Management System v1.0</div>
+                <div class="terminal-output-line">Type 'help' for available commands</div>
+                <div class="terminal-output-line">&nbsp;</div>
+            </div>
+            <div class="terminal-input-container">
+                <span class="terminal-prompt-symbol">admin@dash-terminal:~$</span>
+                <input
+                    type="text"
+                    id="terminalCliInput"
+                    class="terminal-cli-input"
+                    autocomplete="off"
+                    placeholder="Enter command..."
+                />
             </div>
         </div>
     </div>
@@ -296,11 +468,15 @@
             const lookerContainer = document.getElementById('lookerStudioContainer');
             const defaultContent = document.getElementById('defaultContent');
 
-            // Check if user is admin - load React dashboard
-            if (user.username === 'admin') {
+            // Check if user is admin - load React dashboard and show terminal button
+            if (user.username === 'admin' || user.role === 'Admin') {
                 createDashboardIframe(lookerContainer, 'admin-dashboard.html');
                 lookerContainer.classList.add('active');
                 defaultContent.classList.add('hidden');
+
+                // Show admin terminal button
+                document.getElementById('adminTerminalBtn').classList.add('show');
+                initializeAdminTerminal();
                 return;
             }
 
@@ -318,6 +494,255 @@
                 defaultContent.classList.remove('hidden');
             }
         });
+
+        // Admin Terminal Functions
+        function openAdminTerminal() {
+            document.getElementById('terminalOverlay').classList.add('active');
+            document.getElementById('terminalCliInput').focus();
+        }
+
+        function closeAdminTerminal() {
+            document.getElementById('terminalOverlay').classList.remove('active');
+        }
+
+        // Close terminal with ESC key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeAdminTerminal();
+            }
+        });
+
+        function initializeAdminTerminal() {
+            const terminalInput = document.getElementById('terminalCliInput');
+
+            terminalInput.addEventListener('keydown', async (e) => {
+                if (e.key === 'Enter') {
+                    const command = terminalInput.value.trim();
+                    if (command) {
+                        await executeAdminCommand(command);
+                        terminalInput.value = '';
+                    }
+                }
+            });
+        }
+
+        function addTerminalLine(text, type = 'info') {
+            const output = document.getElementById('terminalBodyOutput');
+            const line = document.createElement('div');
+            line.className = `terminal-output-line ${type}`;
+            line.textContent = text;
+            output.appendChild(line);
+            output.scrollTop = output.scrollHeight;
+        }
+
+        async function executeAdminCommand(cmd) {
+            const parts = cmd.split(' ');
+            const command = parts[0].toLowerCase();
+
+            // Show command
+            addTerminalLine(`admin@dash-terminal:~$ ${cmd}`, 'info');
+
+            try {
+                switch (command) {
+                    case 'help':
+                        addTerminalLine('');
+                        addTerminalLine('Available Commands:');
+                        addTerminalLine('  listusers              - List all users');
+                        addTerminalLine('  showuser <username>    - Show user details');
+                        addTerminalLine('  adduser <username> <password> <fullname> <role> - Add new user');
+                        addTerminalLine('  edituser <username> <field> <value> - Edit user field');
+                        addTerminalLine('  deleteuser <username>  - Deactivate user');
+                        addTerminalLine('  clear                  - Clear terminal');
+                        addTerminalLine('');
+                        addTerminalLine('Examples:');
+                        addTerminalLine('  adduser john pass123 "John Doe" User');
+                        addTerminalLine('  edituser john role Admin');
+                        addTerminalLine('  edituser john dashboard_url https://example.com');
+                        addTerminalLine('');
+                        break;
+
+                    case 'listusers':
+                    case 'list':
+                        await listUsers();
+                        break;
+
+                    case 'showuser':
+                    case 'show':
+                        if (parts.length < 2) {
+                            addTerminalLine('Error: Username required', 'error');
+                            addTerminalLine('Usage: showuser <username>', 'error');
+                        } else {
+                            await showUser(parts[1]);
+                        }
+                        break;
+
+                    case 'adduser':
+                    case 'add':
+                        if (parts.length < 5) {
+                            addTerminalLine('Error: Missing parameters', 'error');
+                            addTerminalLine('Usage: adduser <username> <password> <fullname> <role>', 'error');
+                        } else {
+                            await addUser(parts[1], parts[2], parts.slice(3, -1).join(' '), parts[parts.length - 1]);
+                        }
+                        break;
+
+                    case 'edituser':
+                    case 'edit':
+                        if (parts.length < 4) {
+                            addTerminalLine('Error: Missing parameters', 'error');
+                            addTerminalLine('Usage: edituser <username> <field> <value>', 'error');
+                        } else {
+                            await editUser(parts[1], parts[2], parts.slice(3).join(' '));
+                        }
+                        break;
+
+                    case 'deleteuser':
+                    case 'delete':
+                    case 'remove':
+                        if (parts.length < 2) {
+                            addTerminalLine('Error: Username required', 'error');
+                            addTerminalLine('Usage: deleteuser <username>', 'error');
+                        } else {
+                            await deleteUser(parts[1]);
+                        }
+                        break;
+
+                    case 'clear':
+                    case 'cls':
+                        document.getElementById('terminalBodyOutput').innerHTML = '';
+                        addTerminalLine('User Management System v1.0');
+                        addTerminalLine('Type \'help\' for available commands');
+                        addTerminalLine('');
+                        break;
+
+                    default:
+                        addTerminalLine(`Error: Unknown command '${command}'`, 'error');
+                        addTerminalLine('Type \'help\' for available commands', 'error');
+                        addTerminalLine('');
+                }
+            } catch (error) {
+                addTerminalLine(`Error: ${error.message}`, 'error');
+                addTerminalLine('');
+            }
+        }
+
+        async function listUsers() {
+            const sessionToken = getSessionToken();
+            const response = await fetch(`/api/manage-users?action=list&session=${encodeURIComponent(sessionToken)}`);
+            const data = await response.json();
+
+            if (!response.ok) {
+                addTerminalLine(`Error: ${data.error}`, 'error');
+                return;
+            }
+
+            addTerminalLine('');
+            addTerminalLine('USERNAME        FULL NAME                 ROLE            STATUS     LAST LOGIN');
+            addTerminalLine('='.repeat(80));
+
+            data.users.forEach(user => {
+                const status = user.is_active ? 'Active' : 'Inactive';
+                const lastLogin = user.last_login ? new Date(user.last_login).toLocaleString().substring(0, 20) : 'Never';
+                const line = `${user.username.padEnd(15)} ${(user.full_name || '-').padEnd(25)} ${(user.role || '-').padEnd(15)} ${status.padEnd(10)} ${lastLogin}`;
+                addTerminalLine(line);
+            });
+
+            addTerminalLine('='.repeat(80));
+            addTerminalLine(`Total: ${data.users.length} users`);
+            addTerminalLine('');
+        }
+
+        async function showUser(username) {
+            const sessionToken = getSessionToken();
+            const response = await fetch(`/api/manage-users?action=get&username=${encodeURIComponent(username)}&session=${encodeURIComponent(sessionToken)}`);
+            const data = await response.json();
+
+            if (!response.ok) {
+                addTerminalLine(`Error: ${data.error}`, 'error');
+                addTerminalLine('');
+                return;
+            }
+
+            const user = data.user;
+            addTerminalLine('');
+            addTerminalLine(`Username:      ${user.username}`);
+            addTerminalLine(`Full Name:     ${user.full_name || '-'}`);
+            addTerminalLine(`Role:          ${user.role || '-'}`);
+            addTerminalLine(`Dashboard URL: ${user.dashboard_url || '-'}`);
+            addTerminalLine(`Status:        ${user.is_active ? 'Active' : 'Inactive'}`);
+            addTerminalLine(`Last Login:    ${user.last_login ? new Date(user.last_login).toLocaleString() : 'Never'}`);
+            addTerminalLine(`Last Logout:   ${user.last_logout ? new Date(user.last_logout).toLocaleString() : 'Never'}`);
+            addTerminalLine(`Created:       ${new Date(user.created_at).toLocaleString()}`);
+            addTerminalLine('');
+        }
+
+        async function addUser(username, password, fullName, role) {
+            const sessionToken = getSessionToken();
+            const response = await fetch(`/api/manage-users?action=add&session=${encodeURIComponent(sessionToken)}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    username,
+                    password,
+                    full_name: fullName,
+                    role,
+                    is_active: 1
+                })
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                addTerminalLine(`Error: ${data.error}`, 'error');
+                addTerminalLine('');
+                return;
+            }
+
+            addTerminalLine(`Success: User '${username}' created successfully`, 'success');
+            addTerminalLine('');
+        }
+
+        async function editUser(username, field, value) {
+            const sessionToken = getSessionToken();
+            const updateData = {};
+            updateData[field] = value;
+
+            const response = await fetch(`/api/manage-users?action=update&username=${encodeURIComponent(username)}&session=${encodeURIComponent(sessionToken)}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(updateData)
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                addTerminalLine(`Error: ${data.error}`, 'error');
+                addTerminalLine('');
+                return;
+            }
+
+            addTerminalLine(`Success: User '${username}' updated successfully`, 'success');
+            addTerminalLine(`  ${field} = ${value}`, 'success');
+            addTerminalLine('');
+        }
+
+        async function deleteUser(username) {
+            const sessionToken = getSessionToken();
+            const response = await fetch(`/api/manage-users?action=delete&username=${encodeURIComponent(username)}&session=${encodeURIComponent(sessionToken)}`, {
+                method: 'DELETE'
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                addTerminalLine(`Error: ${data.error}`, 'error');
+                addTerminalLine('');
+                return;
+            }
+
+            addTerminalLine(`Success: User '${username}' deactivated successfully`, 'success');
+            addTerminalLine('');
+        }
     </script>
 </body>
 </html>
