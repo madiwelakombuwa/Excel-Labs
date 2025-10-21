@@ -21,121 +21,86 @@
             padding: 20px;
         }
 
-        .login-container {
+        .terminal-container {
             background: #0D1117;
-            padding: 40px;
+            padding: 30px;
             border: 2px solid #33FF00;
             border-radius: 4px;
             box-shadow: 0 0 20px rgba(51, 255, 0, 0.3);
             width: 100%;
-            max-width: 500px;
+            max-width: 700px;
+            min-height: 400px;
         }
 
-        .login-header {
-            margin-bottom: 30px;
-        }
-
-        .login-header h1 {
+        .terminal-header {
             color: #33FF00;
-            font-size: 24px;
-            margin-bottom: 5px;
-            font-weight: normal;
-            letter-spacing: 2px;
+            font-size: 14px;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #006600;
             text-shadow: 0 0 10px rgba(51, 255, 0, 0.5);
         }
 
-        .login-header p {
-            color: #00DD00;
-            font-size: 13px;
-            opacity: 0.8;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
+        .terminal-output {
             color: #33FF00;
-            font-weight: normal;
-            font-size: 13px;
-        }
-
-        .form-group label::before {
-            content: '$ ';
-            color: #00DD00;
-        }
-
-        .form-group input {
-            width: 100%;
-            padding: 10px 12px;
-            border: 1px solid #33FF00;
-            border-radius: 2px;
             font-size: 14px;
-            background: #000000;
-            color: #33FF00;
-            font-family: 'Monaco', 'Menlo', 'Consolas', 'Courier New', monospace;
-            transition: all 0.3s;
+            line-height: 1.6;
+            margin-bottom: 10px;
         }
 
-        .form-group input::placeholder {
-            color: #006600;
-            opacity: 0.7;
+        .terminal-line {
+            margin-bottom: 5px;
         }
 
-        .form-group input:focus {
-            outline: none;
-            border-color: #33FF00;
-            box-shadow: 0 0 10px rgba(51, 255, 0, 0.3);
-            background: #0D1117;
-        }
-
-        .login-btn {
-            width: 100%;
-            padding: 12px;
-            background: #000000;
-            color: #33FF00;
-            border: 2px solid #33FF00;
-            border-radius: 2px;
-            font-size: 14px;
-            font-weight: normal;
-            cursor: pointer;
-            font-family: 'Monaco', 'Menlo', 'Consolas', 'Courier New', monospace;
-            transition: all 0.3s;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .login-btn:hover {
-            background: #33FF00;
-            color: #000000;
-            box-shadow: 0 0 15px rgba(51, 255, 0, 0.5);
-        }
-
-        .login-btn:active {
-            transform: scale(0.98);
-        }
-
-        .error-message {
-            background: #1A0000;
+        .terminal-error {
             color: #FF3333;
-            border: 1px solid #FF3333;
-            padding: 10px;
-            border-radius: 2px;
-            margin-bottom: 20px;
-            font-size: 13px;
-            display: none;
             text-shadow: 0 0 5px rgba(255, 51, 51, 0.5);
         }
 
-        .error-message::before {
-            content: '[ERROR] ';
-            font-weight: bold;
+        .terminal-success {
+            color: #33FF00;
+            text-shadow: 0 0 10px rgba(51, 255, 0, 0.7);
         }
 
-        .error-message.show {
-            display: block;
+        .terminal-prompt {
+            color: #00DD00;
+            display: inline;
+        }
+
+        .terminal-input-line {
+            display: flex;
+            align-items: center;
+            margin-top: 10px;
+        }
+
+        .terminal-input {
+            background: transparent;
+            border: none;
+            color: #33FF00;
+            font-family: 'Monaco', 'Menlo', 'Consolas', 'Courier New', monospace;
+            font-size: 14px;
+            outline: none;
+            flex: 1;
+            caret-color: #33FF00;
+        }
+
+        .terminal-input::selection {
+            background: #33FF00;
+            color: #000000;
+        }
+
+        .cursor {
+            display: inline-block;
+            width: 10px;
+            height: 16px;
+            background: #33FF00;
+            animation: blink 1s infinite;
+            margin-left: 2px;
+        }
+
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
         }
 
         .demo-users {
@@ -182,47 +147,38 @@
             font-family: 'Monaco', 'Menlo', 'Consolas', 'Courier New', monospace;
             color: #33FF00;
         }
+
+        .hidden {
+            display: none;
+        }
     </style>
 </head>
 <body>
-    <div class="login-container">
-        <div class="login-header">
-            <h1>Dash Terminal</h1>
-            <p>Sign in to continue</p>
+    <div class="terminal-container">
+        <div class="terminal-header">
+            DASH TERMINAL v1.0 - Secure Login System
         </div>
 
-        <div id="errorMessage" class="error-message"></div>
+        <div id="terminalOutput" class="terminal-output">
+            <div class="terminal-line">Initializing secure connection...</div>
+            <div class="terminal-line">Connection established.</div>
+            <div class="terminal-line">&nbsp;</div>
+        </div>
 
-        <form id="loginForm">
-            <div class="form-group">
-                <label for="username">Username</label>
-                <input
-                    type="text"
-                    id="username"
-                    name="username"
-                    placeholder="Enter your username"
-                    required
-                    autocomplete="username"
-                >
-            </div>
-
-            <div class="form-group">
-                <label for="password">Password</label>
-                <input
-                    type="password"
-                    id="password"
-                    name="password"
-                    placeholder="Enter your password"
-                    required
-                    autocomplete="current-password"
-                >
-            </div>
-
-            <button type="submit" class="login-btn">Sign In</button>
-        </form>
+        <div id="inputContainer" class="terminal-input-line">
+            <span id="promptText" class="terminal-prompt">login: </span>
+            <input
+                type="text"
+                id="terminalInput"
+                class="terminal-input"
+                autocomplete="off"
+                autofocus
+            >
+            <span class="cursor"></span>
+        </div>
 
         <div class="demo-users">
-            <h3>Demo Users:</h3>
+            <h3>Available Test Accounts:</h3>
             <ul>
                 <li><code>admin</code> / <code>admin123</code></li>
                 <li><code>user1</code> / <code>password1</code></li>
@@ -235,5 +191,140 @@
     </div>
 
     <script src="auth.js"></script>
+    <script>
+        let loginState = 'username'; // username, password, authenticating
+        let username = '';
+        let password = '';
+
+        const terminalOutput = document.getElementById('terminalOutput');
+        const terminalInput = document.getElementById('terminalInput');
+        const promptText = document.getElementById('promptText');
+        const inputContainer = document.getElementById('inputContainer');
+
+        // Focus input on page load
+        terminalInput.focus();
+
+        // Keep focus on terminal input
+        document.addEventListener('click', () => {
+            terminalInput.focus();
+        });
+
+        function addOutputLine(text, className = '') {
+            const line = document.createElement('div');
+            line.className = 'terminal-line' + (className ? ' ' + className : '');
+            line.textContent = text;
+            terminalOutput.appendChild(line);
+            // Auto scroll to bottom
+            terminalOutput.scrollTop = terminalOutput.scrollHeight;
+        }
+
+        function clearInput() {
+            terminalInput.value = '';
+        }
+
+        function hideInput() {
+            inputContainer.classList.add('hidden');
+        }
+
+        function showInput() {
+            inputContainer.classList.remove('hidden');
+            terminalInput.focus();
+        }
+
+        // Handle password masking
+        terminalInput.addEventListener('input', () => {
+            if (loginState === 'password') {
+                // Show asterisks for password
+                const passwordLength = terminalInput.value.length;
+                const lastChar = terminalInput.value[passwordLength - 1];
+                password = terminalInput.value;
+
+                // Visual feedback with asterisks
+                setTimeout(() => {
+                    terminalInput.type = 'password';
+                }, 100);
+            }
+        });
+
+        // Handle Enter key
+        terminalInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                handleEnter();
+            }
+        });
+
+        function handleEnter() {
+            const value = terminalInput.value.trim();
+
+            if (loginState === 'username') {
+                if (!value) {
+                    addOutputLine('login: ', 'terminal-error');
+                    addOutputLine('Username cannot be empty', 'terminal-error');
+                    addOutputLine(' ');
+                    clearInput();
+                    return;
+                }
+
+                username = value;
+                addOutputLine('login: ' + username);
+                loginState = 'password';
+                promptText.textContent = 'password: ';
+                terminalInput.type = 'password';
+                clearInput();
+
+            } else if (loginState === 'password') {
+                password = value;
+                const maskedPassword = '*'.repeat(password.length);
+                addOutputLine('password: ' + maskedPassword);
+                addOutputLine(' ');
+
+                // Hide input and authenticate
+                hideInput();
+                loginState = 'authenticating';
+                authenticate();
+            }
+        }
+
+        function authenticate() {
+            addOutputLine('Authenticating...');
+
+            // Simulate authentication delay for effect
+            setTimeout(() => {
+                const result = authenticateUser(username, password);
+
+                if (result.success) {
+                    addOutputLine('Authentication successful.', 'terminal-success');
+                    addOutputLine('Welcome, ' + result.user.fullName + '!', 'terminal-success');
+                    addOutputLine('Loading dashboard...', 'terminal-success');
+
+                    // Redirect to dashboard
+                    setTimeout(() => {
+                        window.location.href = 'dashboard.html';
+                    }, 800);
+                } else {
+                    addOutputLine('Authentication failed.', 'terminal-error');
+                    addOutputLine('ERROR: ' + result.message, 'terminal-error');
+                    addOutputLine(' ');
+
+                    // Reset for new attempt
+                    resetLogin();
+                }
+            }, 500);
+        }
+
+        function resetLogin() {
+            loginState = 'username';
+            username = '';
+            password = '';
+            promptText.textContent = 'login: ';
+            terminalInput.type = 'text';
+            clearInput();
+            showInput();
+        }
+
+        // Check if already logged in
+        checkAuth();
+    </script>
 </body>
 </html>
