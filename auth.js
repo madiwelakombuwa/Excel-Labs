@@ -1,42 +1,5 @@
-// Dummy users for authentication
-const dummyUsers = [
-    {
-        username: 'admin',
-        password: 'admin123',
-        fullName: 'Administrator',
-        role: 'Admin'
-    },
-    {
-        username: 'user1',
-        password: 'password1',
-        fullName: 'John Doe',
-        role: 'User'
-    },
-    {
-        username: 'user2',
-        password: 'password2',
-        fullName: 'Jane Smith',
-        role: 'User'
-    },
-    {
-        username: 'marketing',
-        password: 'marketing123',
-        fullName: 'Marketing Manager',
-        role: 'Marketing'
-    },
-    {
-        username: 'Accounting',
-        password: 'password123',
-        fullName: 'Accounting Manager',
-        role: 'Accounting'
-    },
-    {
-        username: 'Accounting2',
-        password: 'password123',
-        fullName: 'Accounting Manager 2',
-        role: 'Accounting'
-    }
-];
+// Authentication now uses D1 database via /api/login endpoint
+// All users are stored in the Cloudflare D1 database
 
 // Check if user is already logged in
 function checkAuth() {
@@ -47,24 +10,36 @@ function checkAuth() {
     return loggedInUser;
 }
 
-// Authenticate user
-function authenticateUser(username, password) {
-    const user = dummyUsers.find(
-        u => u.username === username && u.password === password
-    );
+// Authenticate user against D1 database
+async function authenticateUser(username, password) {
+    try {
+        // Call login API
+        const response = await fetch('/api/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ username, password })
+        });
 
-    if (user) {
-        // Store user info (excluding password) in session storage
-        const userInfo = {
-            username: user.username,
-            fullName: user.fullName,
-            role: user.role
-        };
-        sessionStorage.setItem('loggedInUser', JSON.stringify(userInfo));
-        return { success: true, user: userInfo };
+        const data = await response.json();
+
+        if (data.success && data.user) {
+            // Store user info (excluding password) in session storage
+            const userInfo = {
+                username: data.user.username,
+                fullName: data.user.fullName,
+                role: data.user.role
+            };
+            sessionStorage.setItem('loggedInUser', JSON.stringify(userInfo));
+            return { success: true, user: userInfo };
+        } else {
+            return { success: false, message: data.message || 'Invalid username or password' };
+        }
+    } catch (error) {
+        console.error('Authentication error:', error);
+        return { success: false, message: 'Authentication failed. Please try again.' };
     }
-
-    return { success: false, message: 'Invalid username or password' };
 }
 
 // Logout user

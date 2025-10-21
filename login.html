@@ -298,31 +298,29 @@
             }
         }
 
-        function authenticate() {
+        async function authenticate() {
             addOutputLine('Authenticating...');
 
-            // Simulate authentication delay for effect
-            setTimeout(() => {
-                const result = authenticateUser(username, password);
+            // Call async authentication
+            const result = await authenticateUser(username, password);
 
-                if (result.success) {
-                    addOutputLine('Authentication successful.', 'terminal-success');
-                    addOutputLine('Welcome, ' + result.user.fullName + '!', 'terminal-success');
-                    addOutputLine('Loading dashboard...', 'terminal-success');
+            if (result.success) {
+                addOutputLine('Authentication successful.', 'terminal-success');
+                addOutputLine('Welcome, ' + result.user.fullName + '!', 'terminal-success');
+                addOutputLine('Loading dashboard...', 'terminal-success');
 
-                    // Redirect to dashboard
-                    setTimeout(() => {
-                        window.location.href = 'dashboard.html';
-                    }, 800);
-                } else {
-                    addOutputLine('Authentication failed.', 'terminal-error');
-                    addOutputLine('ERROR: ' + result.message, 'terminal-error');
-                    addOutputLine(' ');
+                // Redirect to dashboard
+                setTimeout(() => {
+                    window.location.href = 'dashboard.html';
+                }, 800);
+            } else {
+                addOutputLine('Authentication failed.', 'terminal-error');
+                addOutputLine('ERROR: ' + result.message, 'terminal-error');
+                addOutputLine(' ');
 
-                    // Reset for new attempt
-                    resetLogin();
-                }
-            }, 500);
+                // Reset for new attempt
+                resetLogin();
+            }
         }
 
         function resetLogin() {
