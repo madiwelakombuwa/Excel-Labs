@@ -168,7 +168,7 @@
         </div>
     </nav>
 
-    <!-- Looker Studio Dashboard for user1 -->
+    <!-- Looker Studio Dashboard for user1 and user2 -->
     <div id="lookerStudioContainer" class="looker-studio-container">
         <!-- Iframe will be loaded dynamically via JavaScript -->
     </div>
@@ -210,12 +210,15 @@
 
         // Protected resource loader
         function _0x4c5d(userData) {
-            if (userData.username !== 'user1') return null;
+            // Encoded dashboard configurations (base64)
+            const _0x8g9h = {
+                'user1': 'aHR0cHM6Ly9sb29rZXJzdHVkaW8uZ29vZ2xlLmNvbS9lbWJlZC9yZXBvcnRpbmcvMTE5ZDU2YzAtN2Q3My00YmIwLThmYjktZDY3YTVhNDEzNjFjL3BhZ2UvZWNvSkQ=',
+                'user2': 'aHR0cHM6Ly9sb29rZXJzdHVkaW8uZ29vZ2xlLmNvbS9lbWJlZC9yZXBvcnRpbmcvZThhNTMzNzctMDI3Ny00OWMyLWFkYjAtZjY1MjkxNjM3NTdiL3BhZ2UvZ1pieUM='
+            };
 
-            // Encoded dashboard configuration (base64)
-            const _0x1f2e = 'aHR0cHM6Ly9sb29rZXJzdHVkaW8uZ29vZ2xlLmNvbS9lbWJlZC9yZXBvcnRpbmcvMTE5ZDU2YzAtN2Q3My00YmIwLThmYjktZDY3YTVhNDEzNjFjL3BhZ2UvZWNvSkQ=';
+            const _0x1f2e = _0x8g9h[userData.username];
 
-            return _0x2a3b(_0x1f2e);
+            return _0x1f2e ? _0x2a3b(_0x1f2e) : null;
         }
 
         // Dynamic iframe loader
@@ -246,19 +249,18 @@
             document.getElementById('userName').textContent = user.fullName;
             document.getElementById('userRole').textContent = user.role;
 
-            // Show Looker Studio dashboard for user1, default content for others
+            // Show Looker Studio dashboard for user1 and user2, default content for others
             const lookerContainer = document.getElementById('lookerStudioContainer');
             const defaultContent = document.getElementById('defaultContent');
 
-            if (user.username === 'user1') {
-                // Load protected resource
-                const resourceUrl = _0x4c5d(user);
+            // Attempt to load protected resource for user
+            const resourceUrl = _0x4c5d(user);
 
-                if (resourceUrl) {
-                    _0x6e7f(lookerContainer, resourceUrl);
-                    lookerContainer.classList.add('active');
-                    defaultContent.classList.add('hidden');
-                }
+            if (resourceUrl) {
+                // User has a dashboard - load it
+                _0x6e7f(lookerContainer, resourceUrl);
+                lookerContainer.classList.add('active');
+                defaultContent.classList.add('hidden');
             } else {
                 // Show default content
                 lookerContainer.classList.remove('active');
