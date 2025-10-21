@@ -549,15 +549,21 @@
                         addTerminalLine('Available Commands:');
                         addTerminalLine('  listusers              - List all users');
                         addTerminalLine('  showuser <username>    - Show user details');
-                        addTerminalLine('  adduser <username> <password> <fullname> <role> - Add new user');
+                        addTerminalLine('  adduser <username> <password> <fullname> <role> <dashboard_url> - Add new user');
                         addTerminalLine('  edituser <username> <field> <value> - Edit user field');
                         addTerminalLine('  deleteuser <username>  - Deactivate user');
                         addTerminalLine('  clear                  - Clear terminal');
                         addTerminalLine('');
                         addTerminalLine('Examples:');
-                        addTerminalLine('  adduser john pass123 "John Doe" User');
+                        addTerminalLine('  adduser john pass123 "John Doe" User https://dashboard.com');
+                        addTerminalLine('  adduser sarah pass456 "Sarah Smith" Admin admin-dashboard.html');
                         addTerminalLine('  edituser john role Admin');
+                        addTerminalLine('  edituser john password newpass123');
                         addTerminalLine('  edituser john dashboard_url https://example.com');
+                        addTerminalLine('  edituser john full_name "John Smith"');
+                        addTerminalLine('');
+                        addTerminalLine('Editable Fields:');
+                        addTerminalLine('  password, full_name, role, dashboard_url, is_active');
                         addTerminalLine('');
                         break;
 
@@ -578,11 +584,18 @@
 
                     case 'adduser':
                     case 'add':
-                        if (parts.length < 5) {
+                        if (parts.length < 6) {
                             addTerminalLine('Error: Missing parameters', 'error');
-                            addTerminalLine('Usage: adduser <username> <password> <fullname> <role>', 'error');
+                            addTerminalLine('Usage: adduser <username> <password> <fullname> <role> <dashboard_url>', 'error');
+                            addTerminalLine('Example: adduser john pass123 "John Doe" User https://dashboard.com', 'error');
                         } else {
-                            await addUser(parts[1], parts[2], parts.slice(3, -1).join(' '), parts[parts.length - 1]);
+                            // parts[1]=username, parts[2]=password, parts[3..-2]=fullname, parts[-2]=role, parts[-1]=dashboard_url
+                            const username = parts[1];
+                            const password = parts[2];
+                            const dashboardUrl = parts[parts.length - 1];
+                            const role = parts[parts.length - 2];
+                            const fullName = parts.slice(3, -2).join(' ');
+                            await addUser(username, password, fullName, role, dashboardUrl);
                         }
                         break;
 
@@ -676,7 +689,7 @@
             addTerminalLine('');
         }
 
-        async function addUser(username, password, fullName, role) {
+        async function addUser(username, password, fullName, role, dashboardUrl) {
             const sessionToken = getSessionToken();
             const response = await fetch(`/api/manage-users?action=add&session=${encodeURIComponent(sessionToken)}`, {
                 method: 'POST',
@@ -686,6 +699,7 @@
                     password,
                     full_name: fullName,
                     role,
+                    dashboard_url: dashboardUrl || null,
                     is_active: 1
                 })
             });
@@ -699,6 +713,9 @@
             }
 
             addTerminalLine(`Success: User '${username}' created successfully`, 'success');
+            addTerminalLine(`  Username: ${username}`, 'success');
+            addTerminalLine(`  Role: ${role}`, 'success');
+            addTerminalLine(`  Dashboard: ${dashboardUrl || 'None'}`, 'success');
             addTerminalLine('');
         }
 
