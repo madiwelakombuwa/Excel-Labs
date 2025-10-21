@@ -7,196 +7,12 @@
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://unpkg.com/recharts@2.10.3/dist/Recharts.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        * {
+        body {
             margin: 0;
             padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Monaco', 'Menlo', 'Consolas', 'Courier New', monospace;
-            background: #000000;
-            color: #33FF00;
-            padding: 20px;
-        }
-
-        .terminal-dashboard {
-            max-width: 1400px;
-            margin: 0 auto;
-        }
-
-        .dashboard-header {
-            background: #0D1117;
-            border: 2px solid #33FF00;
-            padding: 20px;
-            margin-bottom: 20px;
-            border-radius: 4px;
-            box-shadow: 0 0 20px rgba(51, 255, 0, 0.3);
-        }
-
-        .dashboard-header h1 {
-            font-size: 24px;
-            letter-spacing: 3px;
-            text-shadow: 0 0 10px rgba(51, 255, 0, 0.5);
-            font-weight: normal;
-        }
-
-        .dashboard-header h1::before {
-            content: '# ';
-            color: #00DD00;
-        }
-
-        .dashboard-header p {
-            font-size: 12px;
-            color: #00DD00;
-            margin-top: 5px;
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-            margin-bottom: 20px;
-        }
-
-        .stat-card {
-            background: #0D1117;
-            border: 1px solid #33FF00;
-            padding: 20px;
-            border-radius: 4px;
-            box-shadow: 0 0 10px rgba(51, 255, 0, 0.2);
-            transition: all 0.3s;
-        }
-
-        .stat-card:hover {
-            box-shadow: 0 0 20px rgba(51, 255, 0, 0.4);
-        }
-
-        .stat-label {
-            font-size: 11px;
-            color: #00DD00;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 10px;
-        }
-
-        .stat-label::before {
-            content: '$ ';
-            color: #33FF00;
-        }
-
-        .stat-value {
-            font-size: 32px;
-            color: #33FF00;
-            text-shadow: 0 0 10px rgba(51, 255, 0, 0.5);
-            font-weight: bold;
-        }
-
-        .stat-change {
-            font-size: 11px;
-            margin-top: 5px;
-        }
-
-        .stat-change.positive {
-            color: #00FF00;
-        }
-
-        .stat-change.negative {
-            color: #FF3333;
-        }
-
-        .charts-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-            gap: 20px;
-            margin-bottom: 20px;
-        }
-
-        .chart-card {
-            background: #0D1117;
-            border: 1px solid #33FF00;
-            padding: 20px;
-            border-radius: 4px;
-            box-shadow: 0 0 10px rgba(51, 255, 0, 0.2);
-        }
-
-        .chart-title {
-            font-size: 14px;
-            color: #33FF00;
-            margin-bottom: 15px;
-            letter-spacing: 1px;
-        }
-
-        .chart-title::before {
-            content: '> ';
-            color: #00DD00;
-        }
-
-        .data-table {
-            background: #0D1117;
-            border: 1px solid #33FF00;
-            padding: 20px;
-            border-radius: 4px;
-            box-shadow: 0 0 10px rgba(51, 255, 0, 0.2);
-            overflow-x: auto;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        th, td {
-            padding: 12px;
-            text-align: left;
-            border-bottom: 1px solid #006600;
-            font-size: 12px;
-        }
-
-        th {
-            color: #33FF00;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            font-weight: normal;
-        }
-
-        td {
-            color: #00DD00;
-        }
-
-        tr:hover {
-            background: rgba(51, 255, 0, 0.05);
-        }
-
-        .status-badge {
-            padding: 3px 8px;
-            border-radius: 2px;
-            font-size: 10px;
-            border: 1px solid;
-        }
-
-        .status-active {
-            color: #00FF00;
-            border-color: #00FF00;
-            background: rgba(0, 255, 0, 0.1);
-        }
-
-        .status-pending {
-            color: #FFAA00;
-            border-color: #FFAA00;
-            background: rgba(255, 170, 0, 0.1);
-        }
-
-        .status-inactive {
-            color: #FF3333;
-            border-color: #FF3333;
-            background: rgba(255, 51, 51, 0.1);
-        }
-
-        canvas {
-            max-height: 300px;
         }
     </style>
 </head>
@@ -204,239 +20,232 @@
     <div id="root"></div>
 
     <script type="text/babel">
-        const { useState, useEffect, useRef } = React;
+        const { useState, useEffect } = React;
+        const { ResponsiveContainer, LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip, BarChart, Bar, ReferenceLine } = Recharts;
 
-        // Dummy data
-        const statsData = [
-            { label: 'Total Users', value: '2,847', change: '+12.5%', positive: true },
-            { label: 'Active Sessions', value: '342', change: '+8.2%', positive: true },
-            { label: 'Revenue', value: '$45.2K', change: '+23.1%', positive: true },
-            { label: 'Server Load', value: '67%', change: '-5.3%', positive: true }
+        const THEME = {
+            bg: "#0b0f0c",
+            panel: "#101812",
+            border: "#1b2b1f",
+            neon: "#39ff14",
+            neonDim: "#2eea0f",
+            text: "#d8fdd0",
+            textDim: "#8acb7f",
+        };
+
+        // Mock Agent dataset
+        const agents = [
+            { name: "Mariah", listings: 405, newListings: 50, sales: 56, target: 10200000, salesVal: 12740161, commission: 382204.83 },
+            { name: "Bruce", listings: 329, newListings: 55, sales: 35, target: 10200000, salesVal: 9957688, commission: 298730.64 },
+            { name: "Justin", listings: 308, newListings: 51, sales: 38, target: 10200000, salesVal: 11926320, commission: 357789.6 },
+            { name: "Celine", listings: 235, newListings: 59, sales: 25, target: 10200000, salesVal: 9614017, commission: 288420.51 },
+            { name: "Elton", listings: 213, newListings: 56, sales: 27, target: 10200000, salesVal: 9871412, commission: 296142.36 },
         ];
 
-        const tableData = [
-            { id: 1, user: 'user1', status: 'active', sessions: 45, lastActive: '2 min ago' },
-            { id: 2, user: 'user2', status: 'active', sessions: 32, lastActive: '5 min ago' },
-            { id: 3, user: 'admin', status: 'active', sessions: 128, lastActive: 'now' },
-            { id: 4, user: 'guest_001', status: 'pending', sessions: 1, lastActive: '15 min ago' },
-            { id: 5, user: 'dev_user', status: 'inactive', sessions: 0, lastActive: '2 hours ago' }
+        const months = [
+            { m: "Jan", sales: 4.6e6 },
+            { m: "Feb", sales: 4.8e6 },
+            { m: "Mar", sales: 5.05e6 },
+            { m: "Apr", sales: 4.7e6 },
+            { m: "May", sales: 5.1e6 },
+            { m: "Jun", sales: 4.9e6 },
+            { m: "Jul", sales: 4.95e6 },
+            { m: "Aug", sales: 5.0e6 },
+            { m: "Sep", sales: 4.6e6 },
+            { m: "Oct", sales: 4.9e6 },
+            { m: "Nov", sales: 5.0e6 },
+            { m: "Dec", sales: 5.15e6 },
         ];
 
-        function StatCard({ label, value, change, positive }) {
+        const activity = [
+            { m: "Jan", listings: 120, newListings: 20, sales: 14 },
+            { m: "Feb", listings: 115, newListings: 16, sales: 10 },
+            { m: "Mar", listings: 130, newListings: 23, sales: 18 },
+            { m: "Apr", listings: 118, newListings: 17, sales: 12 },
+            { m: "May", listings: 140, newListings: 21, sales: 17 },
+            { m: "Jun", listings: 135, newListings: 22, sales: 16 },
+            { m: "Jul", listings: 150, newListings: 25, sales: 20 },
+            { m: "Aug", listings: 142, newListings: 24, sales: 19 },
+            { m: "Sep", listings: 138, newListings: 18, sales: 13 },
+            { m: "Oct", listings: 145, newListings: 20, sales: 15 },
+            { m: "Nov", listings: 140, newListings: 19, sales: 14 },
+            { m: "Dec", listings: 148, newListings: 19, sales: 14 },
+        ];
+
+        const money = (n) =>
+            new Intl.NumberFormat(undefined, { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(n);
+
+        const smallMoney = (n) =>
+            new Intl.NumberFormat(undefined, { style: "currency", currency: "USD", maximumFractionDigits: 2 }).format(n);
+
+        function Panel({ title, children, height = "320px" }) {
             return (
-                <div className="stat-card">
-                    <div className="stat-label">{label}</div>
-                    <div className="stat-value">{value}</div>
-                    <div className={`stat-change ${positive ? 'positive' : 'negative'}`}>
-                        {positive ? '↑' : '↓'} {change}
+                <section className="rounded-2xl p-3 md:p-4 shadow" style={{ background: THEME.panel, border: `1px solid ${THEME.border}` }}>
+                    <div className="text-xs md:text-sm mb-2 tracking-wider" style={{ color: THEME.neon }}>{title}</div>
+                    <div className="rounded-xl p-2" style={{ height, background: THEME.bg, border: `1px dashed ${THEME.border}` }}>{children}</div>
+                </section>
+            );
+        }
+
+        function KPI({ label, value }) {
+            return (
+                <div className="rounded-xl p-3" style={{ background: THEME.panel, border: `1px solid ${THEME.border}` }}>
+                    <div className="text-[10px] md:text-xs" style={{ color: THEME.textDim }}>$ {label}</div>
+                    <div className="text-xl md:text-2xl" style={{ color: THEME.neon }}>{value}</div>
+                </div>
+            );
+        }
+
+        function SideStat({ label, value, foot }) {
+            return (
+                <div className="rounded-2xl p-4" style={{ background: THEME.panel, border: `1px solid ${THEME.border}` }}>
+                    <div className="text-[10px] md:text-xs mb-1" style={{ color: THEME.textDim }}>$ {label}</div>
+                    <div className="text-xl md:text-2xl" style={{ color: THEME.neon }}>{value}</div>
+                    {foot && <div className="text-[10px] mt-1" style={{ color: THEME.textDim }}>{foot}</div>}
+                </div>
+            );
+        }
+
+        function TerminalDashboard() {
+            const totals = agents.reduce(
+                (acc, a) => {
+                    acc.listings += a.listings;
+                    acc.newListings += a.newListings;
+                    acc.sales += a.sales;
+                    acc.salesVal += a.salesVal;
+                    acc.commission += a.commission;
+                    return acc;
+                },
+                { listings: 0, newListings: 0, sales: 0, salesVal: 0, commission: 0 }
+            );
+
+            return (
+                <div className="min-h-screen p-4 md:p-6 font-mono" style={{ background: THEME.bg, color: THEME.text }}>
+                    {/* Header */}
+                    <div className="rounded-2xl p-4 mb-4 shadow" style={{ background: THEME.panel, border: `1px solid ${THEME.border}` }}>
+                        <div className="flex flex-wrap gap-3 items-center justify-between">
+                            <div className="text-xl md:text-2xl tracking-widest" style={{ color: THEME.neon }}>
+                                # COMPANY_DASH
+                            </div>
+                            <div className="text-xs md:text-sm" style={{ color: THEME.textDim }}>
+                                Jan 1, 2015 — Dec 31, 2024
+                            </div>
+                        </div>
+                        <div className="mt-3 grid grid-cols-2 md:grid-cols-4 gap-3">
+                            <KPI label="# LISTINGS" value={totals.listings.toLocaleString()} />
+                            <KPI label="# NEW LISTINGS" value={totals.newListings.toLocaleString()} />
+                            <KPI label="# SALES" value={totals.sales.toLocaleString()} />
+                            <KPI label="$ COMMISSION" value={smallMoney(totals.commission)} />
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-12 gap-4">
+                        {/* Sidebar */}
+                        <aside className="col-span-12 lg:col-span-3 space-y-3">
+                            <SideStat label="$ COMMISSION" value={money(1623288)} foot="COMM % 3%" />
+                            <SideStat label="$ TARGET" value={money(51000000)} />
+                            <SideStat label="$ SALES" value={money(54109598)} foot="TARGET ACHIEVED 106%" />
+                            <SideStat label="AVG. COMMISSION" value={money(324658)} />
+                            <SideStat label="AVG. SALES" value={money(10821920)} />
+                            <SideStat label="AVG. TARGET" value={money(10200000)} />
+                        </aside>
+
+                        {/* Main */}
+                        <main className="col-span-12 lg:col-span-9 space-y-4">
+                            {/* Table */}
+                            <Panel title="> ROSTER | CURRENT AGENTS" height="auto">
+                                <div className="overflow-auto">
+                                    <table className="min-w-full text-xs md:text-sm">
+                                        <thead>
+                                            <tr style={{ color: THEME.neon }}>
+                                                <th className="p-2 text-left">NAME</th>
+                                                <th className="p-2 text-right"># LISTINGS</th>
+                                                <th className="p-2 text-right"># NEW</th>
+                                                <th className="p-2 text-right"># SALES</th>
+                                                <th className="p-2 text-right">$ TARGET</th>
+                                                <th className="p-2 text-right">$ SALES</th>
+                                                <th className="p-2 text-right">$ COMMISSION</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {agents.map((a) => (
+                                                <tr key={a.name} className="border-t" style={{ borderColor: THEME.border }}>
+                                                    <td className="p-2">{a.name}</td>
+                                                    <td className="p-2 text-right">{a.listings.toLocaleString()}</td>
+                                                    <td className="p-2 text-right">{a.newListings.toLocaleString()}</td>
+                                                    <td className="p-2 text-right">{a.sales.toLocaleString()}</td>
+                                                    <td className="p-2 text-right">{money(a.target)}</td>
+                                                    <td className="p-2 text-right">{money(a.salesVal)}</td>
+                                                    <td className="p-2 text-right">{smallMoney(a.commission)}</td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </Panel>
+
+                            <div className="grid md:grid-cols-2 gap-4">
+                                <Panel title="> SALES | TARGET vs ACTUAL">
+                                    <ResponsiveContainer width="100%" height="100%">
+                                        <BarChart data={months} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
+                                            <CartesianGrid stroke={THEME.border} strokeDasharray="3 3" />
+                                            <XAxis dataKey="m" stroke={THEME.textDim} />
+                                            <YAxis stroke={THEME.textDim} tickFormatter={(v) => `$${Math.round(v / 1e6)}M`} />
+                                            <Tooltip contentStyle={{ background: THEME.panel, border: `1px solid ${THEME.border}`, color: THEME.text }} formatter={(v) => money(Number(v))} labelStyle={{ color: THEME.textDim }} />
+                                            <ReferenceLine y={5e6} stroke={THEME.textDim} strokeDasharray="6 6" />
+                                            <Bar dataKey="sales" fill={THEME.neon} opacity={0.85} />
+                                        </BarChart>
+                                    </ResponsiveContainer>
+                                </Panel>
+
+                                <Panel title="> ACTIVITY | LISTINGS vs NEW vs SALES">
+                                    <ResponsiveContainer width="100%" height="100%">
+                                        <LineChart data={activity} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
+                                            <CartesianGrid stroke={THEME.border} />
+                                            <XAxis dataKey="m" stroke={THEME.textDim} />
+                                            <YAxis stroke={THEME.textDim} />
+                                            <Tooltip contentStyle={{ background: THEME.panel, border: `1px solid ${THEME.border}`, color: THEME.text }} labelStyle={{ color: THEME.textDim }} />
+                                            <Line type="monotone" dataKey="listings" stroke={THEME.neon} strokeWidth={2} dot={false} />
+                                            <Line type="monotone" dataKey="newListings" stroke={THEME.neonDim} strokeDasharray="4 2" strokeWidth={2} dot={false} />
+                                            <Line type="monotone" dataKey="sales" stroke="#8aff9c" strokeWidth={2} dot={false} />
+                                        </LineChart>
+                                    </ResponsiveContainer>
+                                </Panel>
+                            </div>
+
+                            <div className="grid md:grid-cols-2 gap-4">
+                                <Panel title="> SALES | BY AGENT">
+                                    <ResponsiveContainer width="100%" height="100%">
+                                        <BarChart layout="vertical" data={agents.map((a) => ({ name: a.name, salesVal: a.salesVal }))} margin={{ top: 10, right: 20, left: 20, bottom: 0 }}>
+                                            <CartesianGrid stroke={THEME.border} />
+                                            <XAxis type="number" stroke={THEME.textDim} tickFormatter={(v) => `$${Math.round(v / 1e6)}M`} />
+                                            <YAxis type="category" dataKey="name" stroke={THEME.textDim} />
+                                            <Tooltip contentStyle={{ background: THEME.panel, border: `1px solid ${THEME.border}`, color: THEME.text }} formatter={(v) => money(Number(v))} />
+                                            <Bar dataKey="salesVal" fill={THEME.neon} />
+                                            <ReferenceLine x={10200000} stroke={THEME.textDim} strokeDasharray="6 6" label={{ value: "$ Target", position: "top", fill: THEME.textDim }} />
+                                        </BarChart>
+                                    </ResponsiveContainer>
+                                </Panel>
+
+                                <Panel title="> COMMISSION | BY AGENT">
+                                    <ResponsiveContainer width="100%" height="100%">
+                                        <BarChart layout="vertical" data={agents.map((a) => ({ name: a.name, commission: a.commission }))} margin={{ top: 10, right: 20, left: 20, bottom: 0 }}>
+                                            <CartesianGrid stroke={THEME.border} />
+                                            <XAxis type="number" stroke={THEME.textDim} tickFormatter={(v) => `$${Math.round(v / 1e3)}K`} />
+                                            <YAxis type="category" dataKey="name" stroke={THEME.textDim} />
+                                            <Tooltip contentStyle={{ background: THEME.panel, border: `1px solid ${THEME.border}`, color: THEME.text }} formatter={(v) => smallMoney(Number(v))} />
+                                            <Bar dataKey="commission" fill={THEME.neon} />
+                                        </BarChart>
+                                    </ResponsiveContainer>
+                                </Panel>
+                            </div>
+                        </main>
                     </div>
                 </div>
             );
         }
 
-        function ChartCard({ title, type, children }) {
-            return (
-                <div className="chart-card">
-                    <div className="chart-title">{title}</div>
-                    {children}
-                </div>
-            );
-        }
-
-        function LineChart() {
-            const canvasRef = useRef(null);
-
-            useEffect(() => {
-                const ctx = canvasRef.current.getContext('2d');
-                const chart = new Chart(ctx, {
-                    type: 'line',
-                    data: {
-                        labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-                        datasets: [{
-                            label: 'Active Users',
-                            data: [320, 380, 420, 390, 450, 480, 520],
-                            borderColor: '#33FF00',
-                            backgroundColor: 'rgba(51, 255, 0, 0.1)',
-                            borderWidth: 2,
-                            tension: 0.4
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: true,
-                        plugins: {
-                            legend: {
-                                labels: { color: '#33FF00', font: { family: 'Monaco, monospace' } }
-                            }
-                        },
-                        scales: {
-                            y: {
-                                ticks: { color: '#00DD00', font: { family: 'Monaco, monospace' } },
-                                grid: { color: '#006600' }
-                            },
-                            x: {
-                                ticks: { color: '#00DD00', font: { family: 'Monaco, monospace' } },
-                                grid: { color: '#006600' }
-                            }
-                        }
-                    }
-                });
-
-                return () => chart.destroy();
-            }, []);
-
-            return <canvas ref={canvasRef}></canvas>;
-        }
-
-        function BarChart() {
-            const canvasRef = useRef(null);
-
-            useEffect(() => {
-                const ctx = canvasRef.current.getContext('2d');
-                const chart = new Chart(ctx, {
-                    type: 'bar',
-                    data: {
-                        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-                        datasets: [{
-                            label: 'Revenue ($K)',
-                            data: [32, 38, 42, 45, 48, 52],
-                            backgroundColor: 'rgba(51, 255, 0, 0.3)',
-                            borderColor: '#33FF00',
-                            borderWidth: 1
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: true,
-                        plugins: {
-                            legend: {
-                                labels: { color: '#33FF00', font: { family: 'Monaco, monospace' } }
-                            }
-                        },
-                        scales: {
-                            y: {
-                                ticks: { color: '#00DD00', font: { family: 'Monaco, monospace' } },
-                                grid: { color: '#006600' }
-                            },
-                            x: {
-                                ticks: { color: '#00DD00', font: { family: 'Monaco, monospace' } },
-                                grid: { color: '#006600' }
-                            }
-                        }
-                    }
-                });
-
-                return () => chart.destroy();
-            }, []);
-
-            return <canvas ref={canvasRef}></canvas>;
-        }
-
-        function DoughnutChart() {
-            const canvasRef = useRef(null);
-
-            useEffect(() => {
-                const ctx = canvasRef.current.getContext('2d');
-                const chart = new Chart(ctx, {
-                    type: 'doughnut',
-                    data: {
-                        labels: ['Active', 'Idle', 'Offline'],
-                        datasets: [{
-                            data: [65, 25, 10],
-                            backgroundColor: [
-                                'rgba(51, 255, 0, 0.7)',
-                                'rgba(255, 170, 0, 0.7)',
-                                'rgba(255, 51, 51, 0.7)'
-                            ],
-                            borderColor: ['#33FF00', '#FFAA00', '#FF3333'],
-                            borderWidth: 2
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: true,
-                        plugins: {
-                            legend: {
-                                labels: { color: '#33FF00', font: { family: 'Monaco, monospace' } }
-                            }
-                        }
-                    }
-                });
-
-                return () => chart.destroy();
-            }, []);
-
-            return <canvas ref={canvasRef}></canvas>;
-        }
-
-        function DataTable() {
-            return (
-                <div className="data-table">
-                    <div className="chart-title">User Sessions</div>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Username</th>
-                                <th>Status</th>
-                                <th>Sessions</th>
-                                <th>Last Active</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {tableData.map(row => (
-                                <tr key={row.id}>
-                                    <td>{row.id}</td>
-                                    <td>{row.user}</td>
-                                    <td>
-                                        <span className={`status-badge status-${row.status}`}>
-                                            {row.status}
-                                        </span>
-                                    </td>
-                                    <td>{row.sessions}</td>
-                                    <td>{row.lastActive}</td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
-            );
-        }
-
-        function Dashboard() {
-            return (
-                <div className="terminal-dashboard">
-                    <div className="dashboard-header">
-                        <h1>ADMIN DASHBOARD</h1>
-                        <p>Real-time system monitoring and analytics</p>
-                    </div>
-
-                    <div className="stats-grid">
-                        {statsData.map((stat, index) => (
-                            <StatCard key={index} {...stat} />
-                        ))}
-                    </div>
-
-                    <div className="charts-grid">
-                        <ChartCard title="Weekly User Activity">
-                            <LineChart />
-                        </ChartCard>
-                        <ChartCard title="Monthly Revenue">
-                            <BarChart />
-                        </ChartCard>
-                    </div>
-
-                    <div className="charts-grid">
-                        <ChartCard title="User Status Distribution">
-                            <DoughnutChart />
-                        </ChartCard>
-                        <DataTable />
-                    </div>
-                </div>
-            );
-        }
-
-        ReactDOM.render(<Dashboard />, document.getElementById('root'));
+        ReactDOM.render(<TerminalDashboard />, document.getElementById('root'));
     </script>
 </body>
 </html>
