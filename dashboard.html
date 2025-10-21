@@ -203,44 +203,46 @@
 
     <script src="auth.js"></script>
     <script>
-        // Dynamic iframe loader
-        function createDashboardIframe(container, src) {
+        // Dynamic iframe loader - loads proxied content
+        function createDashboardIframe(container, proxyUrl) {
             const iframe = document.createElement('iframe');
             iframe.frameBorder = '0';
             iframe.allowFullscreen = true;
             iframe.setAttribute('sandbox', 'allow-storage-access-by-user-activation allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox');
-            iframe.src = src;
+
+            // Load dashboard through proxy - actual Looker Studio URL is never exposed
+            iframe.src = proxyUrl;
 
             container.appendChild(iframe);
         }
 
-        // Fetch dashboard URL from server-side proxy
-        async function loadDashboard() {
+        // Check if user has dashboard access
+        async function checkDashboardAccess() {
             const sessionToken = getSessionToken();
 
             if (!sessionToken) {
                 console.error('No session token available');
-                return null;
+                return false;
             }
 
             try {
-                // Call server-side endpoint - URL is stored securely on server
+                // Check if user has a dashboard assigned
                 const response = await fetch(`/api/dashboard?session=${encodeURIComponent(sessionToken)}`);
 
                 if (!response.ok) {
                     if (response.status === 401) {
                         console.log('Unauthorized - redirecting to login');
                         window.location.href = 'login.html';
-                        return null;
+                        return false;
                     }
-                    throw new Error(`Server error: ${response.status}`);
+                    return false;
                 }
 
                 const data = await response.json();
-                return data.dashboardUrl;
+                return data.dashboardUrl ? true : false;
             } catch (error) {
-                console.error('Failed to load dashboard:', error);
-                return null;
+                console.error('Failed to check dashboard access:', error);
+                return false;
             }
         }
 
@@ -260,12 +262,16 @@
             const lookerContainer = document.getElementById('lookerStudioContainer');
             const defaultContent = document.getElementById('defaultContent');
 
-            // Try to load dashboard from server-side proxy
-            const dashboardUrl = await loadDashboard();
+            // Check if user has dashboard access
+            const hasAccess = await checkDashboardAccess();
 
-            if (dashboardUrl) {
-                // User has a dashboard - load it
-                createDashboardIframe(lookerContainer, dashboardUrl);
+            if (hasAccess) {
+                // User has a dashboard - load it through the proxy
+                // The actual Looker Studio URL is never exposed to the client
+                const sessionToken = getSessionToken();
+                const proxyUrl = `/api/dashboard-proxy?session=${encodeURIComponent(sessionToken)}`;
+
+                createDashboardIframe(lookerContainer, proxyUrl);
                 lookerContainer.classList.add('active');
                 defaultContent.classList.add('hidden');
             } else {
