@@ -7,12 +7,200 @@
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <script src="https://unpkg.com/recharts@2.10.3/dist/Recharts.js"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <style>
-        body {
+        * {
             margin: 0;
             padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Monaco', 'Menlo', 'Consolas', 'Courier New', monospace;
+            background: #0b0f0c;
+            color: #d8fdd0;
+            padding: 0;
+            margin: 0;
+        }
+
+        .dashboard {
+            padding: 1.5rem;
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: #101812;
+            border: 1px solid #1b2b1f;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .header-title {
+            font-size: 1.5rem;
+            color: #39ff14;
+            letter-spacing: 3px;
+        }
+
+        .header-date {
+            font-size: 0.875rem;
+            color: #8acb7f;
+        }
+
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .kpi-card {
+            background: #101812;
+            border: 1px solid #1b2b1f;
+            border-radius: 0.75rem;
+            padding: 1rem;
+        }
+
+        .kpi-label {
+            font-size: 0.75rem;
+            color: #8acb7f;
+            margin-bottom: 0.5rem;
+        }
+
+        .kpi-value {
+            font-size: 1.5rem;
+            color: #39ff14;
+            font-weight: bold;
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 1.5rem;
+        }
+
+        @media (max-width: 1024px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .stat-card {
+            background: #101812;
+            border: 1px solid #1b2b1f;
+            border-radius: 1rem;
+            padding: 1.25rem;
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            color: #8acb7f;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-value {
+            font-size: 1.25rem;
+            color: #39ff14;
+            font-weight: bold;
+        }
+
+        .stat-foot {
+            font-size: 0.7rem;
+            color: #8acb7f;
+            margin-top: 0.5rem;
+        }
+
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .panel {
+            background: #101812;
+            border: 1px solid #1b2b1f;
+            border-radius: 1rem;
+            padding: 1.25rem;
+        }
+
+        .panel-title {
+            font-size: 0.875rem;
+            color: #39ff14;
+            margin-bottom: 1rem;
+            letter-spacing: 1px;
+        }
+
+        .panel-content {
+            background: #0b0f0c;
+            border: 1px dashed #1b2b1f;
+            border-radius: 0.75rem;
+            padding: 1rem;
+            min-height: 320px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.875rem;
+        }
+
+        th, td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid #1b2b1f;
+        }
+
+        th {
+            color: #39ff14;
+            font-weight: normal;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+        }
+
+        td {
+            color: #d8fdd0;
+        }
+
+        .text-right {
+            text-align: right;
+        }
+
+        .chart-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 1.5rem;
+        }
+
+        canvas {
+            max-height: 300px;
+        }
+
+        @media (max-width: 768px) {
+            .dashboard {
+                padding: 1rem;
+            }
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+            .chart-grid {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
@@ -20,20 +208,9 @@
     <div id="root"></div>
 
     <script type="text/babel">
-        const { useState, useEffect } = React;
-        const { ResponsiveContainer, LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip, BarChart, Bar, ReferenceLine } = Recharts;
+        const { useEffect, useRef } = React;
 
-        const THEME = {
-            bg: "#0b0f0c",
-            panel: "#101812",
-            border: "#1b2b1f",
-            neon: "#39ff14",
-            neonDim: "#2eea0f",
-            text: "#d8fdd0",
-            textDim: "#8acb7f",
-        };
-
-        // Mock Agent dataset
+        // Data
         const agents = [
             { name: "Mariah", listings: 405, newListings: 50, sales: 56, target: 10200000, salesVal: 12740161, commission: 382204.83 },
             { name: "Bruce", listings: 329, newListings: 55, sales: 35, target: 10200000, salesVal: 9957688, commission: 298730.64 },
@@ -65,48 +242,228 @@
             { m: "May", listings: 140, newListings: 21, sales: 17 },
             { m: "Jun", listings: 135, newListings: 22, sales: 16 },
             { m: "Jul", listings: 150, newListings: 25, sales: 20 },
-            { m: "Aug", listings: 142, newListings: 24, sales: 19 },
+            { m: "Aug", sales: 142, newListings: 24, sales: 19 },
             { m: "Sep", listings: 138, newListings: 18, sales: 13 },
             { m: "Oct", listings: 145, newListings: 20, sales: 15 },
             { m: "Nov", listings: 140, newListings: 19, sales: 14 },
             { m: "Dec", listings: 148, newListings: 19, sales: 14 },
         ];
 
-        const money = (n) =>
-            new Intl.NumberFormat(undefined, { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(n);
+        const money = (n) => new Intl.NumberFormat(undefined, { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(n);
+        const smallMoney = (n) => new Intl.NumberFormat(undefined, { style: "currency", currency: "USD", maximumFractionDigits: 2 }).format(n);
 
-        const smallMoney = (n) =>
-            new Intl.NumberFormat(undefined, { style: "currency", currency: "USD", maximumFractionDigits: 2 }).format(n);
+        const chartConfig = {
+            plugins: {
+                legend: {
+                    labels: { color: '#39ff14', font: { family: 'Monaco, monospace', size: 11 } }
+                }
+            },
+            scales: {
+                y: {
+                    ticks: { color: '#8acb7f', font: { family: 'Monaco, monospace' } },
+                    grid: { color: '#1b2b1f' }
+                },
+                x: {
+                    ticks: { color: '#8acb7f', font: { family: 'Monaco, monospace' } },
+                    grid: { color: '#1b2b1f' }
+                }
+            }
+        };
 
-        function Panel({ title, children, height = "320px" }) {
-            return (
-                <section className="rounded-2xl p-3 md:p-4 shadow" style={{ background: THEME.panel, border: `1px solid ${THEME.border}` }}>
-                    <div className="text-xs md:text-sm mb-2 tracking-wider" style={{ color: THEME.neon }}>{title}</div>
-                    <div className="rounded-xl p-2" style={{ height, background: THEME.bg, border: `1px dashed ${THEME.border}` }}>{children}</div>
-                </section>
-            );
+        function SalesChart() {
+            const canvasRef = useRef(null);
+
+            useEffect(() => {
+                const ctx = canvasRef.current.getContext('2d');
+                const chart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: months.map(m => m.m),
+                        datasets: [{
+                            label: 'Monthly Sales',
+                            data: months.map(m => m.sales),
+                            backgroundColor: 'rgba(57, 255, 20, 0.7)',
+                            borderColor: '#39ff14',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        ...chartConfig,
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        plugins: {
+                            ...chartConfig.plugins,
+                            annotation: {
+                                annotations: {
+                                    line1: {
+                                        type: 'line',
+                                        yMin: 5000000,
+                                        yMax: 5000000,
+                                        borderColor: '#8acb7f',
+                                        borderWidth: 2,
+                                        borderDash: [6, 6],
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            ...chartConfig.scales,
+                            y: {
+                                ...chartConfig.scales.y,
+                                ticks: {
+                                    ...chartConfig.scales.y.ticks,
+                                    callback: function(value) {
+                                        return '$' + (value / 1e6).toFixed(1) + 'M';
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+
+                return () => chart.destroy();
+            }, []);
+
+            return <canvas ref={canvasRef}></canvas>;
         }
 
-        function KPI({ label, value }) {
-            return (
-                <div className="rounded-xl p-3" style={{ background: THEME.panel, border: `1px solid ${THEME.border}` }}>
-                    <div className="text-[10px] md:text-xs" style={{ color: THEME.textDim }}>$ {label}</div>
-                    <div className="text-xl md:text-2xl" style={{ color: THEME.neon }}>{value}</div>
-                </div>
-            );
+        function ActivityChart() {
+            const canvasRef = useRef(null);
+
+            useEffect(() => {
+                const ctx = canvasRef.current.getContext('2d');
+                const chart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: activity.map(a => a.m),
+                        datasets: [
+                            {
+                                label: 'Listings',
+                                data: activity.map(a => a.listings),
+                                borderColor: '#39ff14',
+                                backgroundColor: 'rgba(57, 255, 20, 0.1)',
+                                borderWidth: 2,
+                                tension: 0.4
+                            },
+                            {
+                                label: 'New Listings',
+                                data: activity.map(a => a.newListings),
+                                borderColor: '#2eea0f',
+                                borderWidth: 2,
+                                borderDash: [4, 2],
+                                tension: 0.4,
+                                fill: false
+                            },
+                            {
+                                label: 'Sales',
+                                data: activity.map(a => a.sales),
+                                borderColor: '#8aff9c',
+                                borderWidth: 2,
+                                tension: 0.4,
+                                fill: false
+                            }
+                        ]
+                    },
+                    options: {
+                        ...chartConfig,
+                        responsive: true,
+                        maintainAspectRatio: true,
+                    }
+                });
+
+                return () => chart.destroy();
+            }, []);
+
+            return <canvas ref={canvasRef}></canvas>;
         }
 
-        function SideStat({ label, value, foot }) {
-            return (
-                <div className="rounded-2xl p-4" style={{ background: THEME.panel, border: `1px solid ${THEME.border}` }}>
-                    <div className="text-[10px] md:text-xs mb-1" style={{ color: THEME.textDim }}>$ {label}</div>
-                    <div className="text-xl md:text-2xl" style={{ color: THEME.neon }}>{value}</div>
-                    {foot && <div className="text-[10px] mt-1" style={{ color: THEME.textDim }}>{foot}</div>}
-                </div>
-            );
+        function AgentSalesChart() {
+            const canvasRef = useRef(null);
+
+            useEffect(() => {
+                const ctx = canvasRef.current.getContext('2d');
+                const chart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: agents.map(a => a.name),
+                        datasets: [{
+                            label: 'Sales Value',
+                            data: agents.map(a => a.salesVal),
+                            backgroundColor: 'rgba(57, 255, 20, 0.7)',
+                            borderColor: '#39ff14',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        ...chartConfig,
+                        indexAxis: 'y',
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        scales: {
+                            x: {
+                                ...chartConfig.scales.x,
+                                ticks: {
+                                    ...chartConfig.scales.x.ticks,
+                                    callback: function(value) {
+                                        return '$' + (value / 1e6).toFixed(1) + 'M';
+                                    }
+                                }
+                            },
+                            y: chartConfig.scales.y
+                        }
+                    }
+                });
+
+                return () => chart.destroy();
+            }, []);
+
+            return <canvas ref={canvasRef}></canvas>;
         }
 
-        function TerminalDashboard() {
+        function CommissionChart() {
+            const canvasRef = useRef(null);
+
+            useEffect(() => {
+                const ctx = canvasRef.current.getContext('2d');
+                const chart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: agents.map(a => a.name),
+                        datasets: [{
+                            label: 'Commission',
+                            data: agents.map(a => a.commission),
+                            backgroundColor: 'rgba(57, 255, 20, 0.7)',
+                            borderColor: '#39ff14',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        ...chartConfig,
+                        indexAxis: 'y',
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        scales: {
+                            x: {
+                                ...chartConfig.scales.x,
+                                ticks: {
+                                    ...chartConfig.scales.x.ticks,
+                                    callback: function(value) {
+                                        return '$' + (value / 1e3).toFixed(0) + 'K';
+                                    }
+                                }
+                            },
+                            y: chartConfig.scales.y
+                        }
+                    }
+                });
+
+                return () => chart.destroy();
+            }, []);
+
+            return <canvas ref={canvasRef}></canvas>;
+        }
+
+        function Dashboard() {
             const totals = agents.reduce(
                 (acc, a) => {
                     acc.listings += a.listings;
@@ -120,124 +477,127 @@
             );
 
             return (
-                <div className="min-h-screen p-4 md:p-6 font-mono" style={{ background: THEME.bg, color: THEME.text }}>
-                    {/* Header */}
-                    <div className="rounded-2xl p-4 mb-4 shadow" style={{ background: THEME.panel, border: `1px solid ${THEME.border}` }}>
-                        <div className="flex flex-wrap gap-3 items-center justify-between">
-                            <div className="text-xl md:text-2xl tracking-widest" style={{ color: THEME.neon }}>
-                                # COMPANY_DASH
-                            </div>
-                            <div className="text-xs md:text-sm" style={{ color: THEME.textDim }}>
-                                Jan 1, 2015 — Dec 31, 2024
-                            </div>
+                <div className="dashboard">
+                    <div className="header">
+                        <div className="header-top">
+                            <div className="header-title"># COMPANY_DASH</div>
+                            <div className="header-date">Jan 1, 2015 — Dec 31, 2024</div>
                         </div>
-                        <div className="mt-3 grid grid-cols-2 md:grid-cols-4 gap-3">
-                            <KPI label="# LISTINGS" value={totals.listings.toLocaleString()} />
-                            <KPI label="# NEW LISTINGS" value={totals.newListings.toLocaleString()} />
-                            <KPI label="# SALES" value={totals.sales.toLocaleString()} />
-                            <KPI label="$ COMMISSION" value={smallMoney(totals.commission)} />
+                        <div className="kpi-grid">
+                            <div className="kpi-card">
+                                <div className="kpi-label">$ # LISTINGS</div>
+                                <div className="kpi-value">{totals.listings.toLocaleString()}</div>
+                            </div>
+                            <div className="kpi-card">
+                                <div className="kpi-label">$ # NEW LISTINGS</div>
+                                <div className="kpi-value">{totals.newListings.toLocaleString()}</div>
+                            </div>
+                            <div className="kpi-card">
+                                <div className="kpi-label">$ # SALES</div>
+                                <div className="kpi-value">{totals.sales.toLocaleString()}</div>
+                            </div>
+                            <div className="kpi-card">
+                                <div className="kpi-label">$ COMMISSION</div>
+                                <div className="kpi-value">{smallMoney(totals.commission)}</div>
+                            </div>
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-12 gap-4">
-                        {/* Sidebar */}
-                        <aside className="col-span-12 lg:col-span-3 space-y-3">
-                            <SideStat label="$ COMMISSION" value={money(1623288)} foot="COMM % 3%" />
-                            <SideStat label="$ TARGET" value={money(51000000)} />
-                            <SideStat label="$ SALES" value={money(54109598)} foot="TARGET ACHIEVED 106%" />
-                            <SideStat label="AVG. COMMISSION" value={money(324658)} />
-                            <SideStat label="AVG. SALES" value={money(10821920)} />
-                            <SideStat label="AVG. TARGET" value={money(10200000)} />
+                    <div className="main-grid">
+                        <aside className="sidebar">
+                            <div className="stat-card">
+                                <div className="stat-label">$ COMMISSION</div>
+                                <div className="stat-value">{money(1623288)}</div>
+                                <div className="stat-foot">COMM % 3%</div>
+                            </div>
+                            <div className="stat-card">
+                                <div className="stat-label">$ TARGET</div>
+                                <div className="stat-value">{money(51000000)}</div>
+                            </div>
+                            <div className="stat-card">
+                                <div className="stat-label">$ SALES</div>
+                                <div className="stat-value">{money(54109598)}</div>
+                                <div className="stat-foot">TARGET ACHIEVED 106%</div>
+                            </div>
+                            <div className="stat-card">
+                                <div className="stat-label">AVG. COMMISSION</div>
+                                <div className="stat-value">{money(324658)}</div>
+                            </div>
+                            <div className="stat-card">
+                                <div className="stat-label">AVG. SALES</div>
+                                <div className="stat-value">{money(10821920)}</div>
+                            </div>
+                            <div className="stat-card">
+                                <div className="stat-label">AVG. TARGET</div>
+                                <div className="stat-value">{money(10200000)}</div>
+                            </div>
                         </aside>
 
-                        {/* Main */}
-                        <main className="col-span-12 lg:col-span-9 space-y-4">
-                            {/* Table */}
-                            <Panel title="> ROSTER | CURRENT AGENTS" height="auto">
-                                <div className="overflow-auto">
-                                    <table className="min-w-full text-xs md:text-sm">
-                                        <thead>
-                                            <tr style={{ color: THEME.neon }}>
-                                                <th className="p-2 text-left">NAME</th>
-                                                <th className="p-2 text-right"># LISTINGS</th>
-                                                <th className="p-2 text-right"># NEW</th>
-                                                <th className="p-2 text-right"># SALES</th>
-                                                <th className="p-2 text-right">$ TARGET</th>
-                                                <th className="p-2 text-right">$ SALES</th>
-                                                <th className="p-2 text-right">$ COMMISSION</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {agents.map((a) => (
-                                                <tr key={a.name} className="border-t" style={{ borderColor: THEME.border }}>
-                                                    <td className="p-2">{a.name}</td>
-                                                    <td className="p-2 text-right">{a.listings.toLocaleString()}</td>
-                                                    <td className="p-2 text-right">{a.newListings.toLocaleString()}</td>
-                                                    <td className="p-2 text-right">{a.sales.toLocaleString()}</td>
-                                                    <td className="p-2 text-right">{money(a.target)}</td>
-                                                    <td className="p-2 text-right">{money(a.salesVal)}</td>
-                                                    <td className="p-2 text-right">{smallMoney(a.commission)}</td>
+                        <main className="main-content">
+                            <div className="panel">
+                                <div className="panel-title">&gt; ROSTER | CURRENT AGENTS</div>
+                                <div className="panel-content" style={{minHeight: 'auto'}}>
+                                    <div style={{overflowX: 'auto'}}>
+                                        <table>
+                                            <thead>
+                                                <tr>
+                                                    <th>NAME</th>
+                                                    <th className="text-right"># LISTINGS</th>
+                                                    <th className="text-right"># NEW</th>
+                                                    <th className="text-right"># SALES</th>
+                                                    <th className="text-right">$ TARGET</th>
+                                                    <th className="text-right">$ SALES</th>
+                                                    <th className="text-right">$ COMMISSION</th>
                                                 </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
+                                            </thead>
+                                            <tbody>
+                                                {agents.map(a => (
+                                                    <tr key={a.name}>
+                                                        <td>{a.name}</td>
+                                                        <td className="text-right">{a.listings.toLocaleString()}</td>
+                                                        <td className="text-right">{a.newListings.toLocaleString()}</td>
+                                                        <td className="text-right">{a.sales.toLocaleString()}</td>
+                                                        <td className="text-right">{money(a.target)}</td>
+                                                        <td className="text-right">{money(a.salesVal)}</td>
+                                                        <td className="text-right">{smallMoney(a.commission)}</td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
                                 </div>
-                            </Panel>
-
-                            <div className="grid md:grid-cols-2 gap-4">
-                                <Panel title="> SALES | TARGET vs ACTUAL">
-                                    <ResponsiveContainer width="100%" height="100%">
-                                        <BarChart data={months} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
-                                            <CartesianGrid stroke={THEME.border} strokeDasharray="3 3" />
-                                            <XAxis dataKey="m" stroke={THEME.textDim} />
-                                            <YAxis stroke={THEME.textDim} tickFormatter={(v) => `$${Math.round(v / 1e6)}M`} />
-                                            <Tooltip contentStyle={{ background: THEME.panel, border: `1px solid ${THEME.border}`, color: THEME.text }} formatter={(v) => money(Number(v))} labelStyle={{ color: THEME.textDim }} />
-                                            <ReferenceLine y={5e6} stroke={THEME.textDim} strokeDasharray="6 6" />
-                                            <Bar dataKey="sales" fill={THEME.neon} opacity={0.85} />
-                                        </BarChart>
-                                    </ResponsiveContainer>
-                                </Panel>
-
-                                <Panel title="> ACTIVITY | LISTINGS vs NEW vs SALES">
-                                    <ResponsiveContainer width="100%" height="100%">
-                                        <LineChart data={activity} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
-                                            <CartesianGrid stroke={THEME.border} />
-                                            <XAxis dataKey="m" stroke={THEME.textDim} />
-                                            <YAxis stroke={THEME.textDim} />
-                                            <Tooltip contentStyle={{ background: THEME.panel, border: `1px solid ${THEME.border}`, color: THEME.text }} labelStyle={{ color: THEME.textDim }} />
-                                            <Line type="monotone" dataKey="listings" stroke={THEME.neon} strokeWidth={2} dot={false} />
-                                            <Line type="monotone" dataKey="newListings" stroke={THEME.neonDim} strokeDasharray="4 2" strokeWidth={2} dot={false} />
-                                            <Line type="monotone" dataKey="sales" stroke="#8aff9c" strokeWidth={2} dot={false} />
-                                        </LineChart>
-                                    </ResponsiveContainer>
-                                </Panel>
                             </div>
 
-                            <div className="grid md:grid-cols-2 gap-4">
-                                <Panel title="> SALES | BY AGENT">
-                                    <ResponsiveContainer width="100%" height="100%">
-                                        <BarChart layout="vertical" data={agents.map((a) => ({ name: a.name, salesVal: a.salesVal }))} margin={{ top: 10, right: 20, left: 20, bottom: 0 }}>
-                                            <CartesianGrid stroke={THEME.border} />
-                                            <XAxis type="number" stroke={THEME.textDim} tickFormatter={(v) => `$${Math.round(v / 1e6)}M`} />
-                                            <YAxis type="category" dataKey="name" stroke={THEME.textDim} />
-                                            <Tooltip contentStyle={{ background: THEME.panel, border: `1px solid ${THEME.border}`, color: THEME.text }} formatter={(v) => money(Number(v))} />
-                                            <Bar dataKey="salesVal" fill={THEME.neon} />
-                                            <ReferenceLine x={10200000} stroke={THEME.textDim} strokeDasharray="6 6" label={{ value: "$ Target", position: "top", fill: THEME.textDim }} />
-                                        </BarChart>
-                                    </ResponsiveContainer>
-                                </Panel>
+                            <div className="chart-grid">
+                                <div className="panel">
+                                    <div className="panel-title">&gt; SALES | TARGET vs ACTUAL</div>
+                                    <div className="panel-content">
+                                        <SalesChart />
+                                    </div>
+                                </div>
 
-                                <Panel title="> COMMISSION | BY AGENT">
-                                    <ResponsiveContainer width="100%" height="100%">
-                                        <BarChart layout="vertical" data={agents.map((a) => ({ name: a.name, commission: a.commission }))} margin={{ top: 10, right: 20, left: 20, bottom: 0 }}>
-                                            <CartesianGrid stroke={THEME.border} />
-                                            <XAxis type="number" stroke={THEME.textDim} tickFormatter={(v) => `$${Math.round(v / 1e3)}K`} />
-                                            <YAxis type="category" dataKey="name" stroke={THEME.textDim} />
-                                            <Tooltip contentStyle={{ background: THEME.panel, border: `1px solid ${THEME.border}`, color: THEME.text }} formatter={(v) => smallMoney(Number(v))} />
-                                            <Bar dataKey="commission" fill={THEME.neon} />
-                                        </BarChart>
-                                    </ResponsiveContainer>
-                                </Panel>
+                                <div className="panel">
+                                    <div className="panel-title">&gt; ACTIVITY | LISTINGS vs NEW vs SALES</div>
+                                    <div className="panel-content">
+                                        <ActivityChart />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="chart-grid">
+                                <div className="panel">
+                                    <div className="panel-title">&gt; SALES | BY AGENT</div>
+                                    <div className="panel-content">
+                                        <AgentSalesChart />
+                                    </div>
+                                </div>
+
+                                <div className="panel">
+                                    <div className="panel-title">&gt; COMMISSION | BY AGENT</div>
+                                    <div className="panel-content">
+                                        <CommissionChart />
+                                    </div>
+                                </div>
                             </div>
                         </main>
                     </div>
@@ -245,7 +605,7 @@
             );
         }
 
-        ReactDOM.render(<TerminalDashboard />, document.getElementById('root'));
+        ReactDOM.render(<Dashboard />, document.getElementById('root'));
     </script>
 </body>
 </html>
