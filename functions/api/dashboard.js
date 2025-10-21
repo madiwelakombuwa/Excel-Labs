@@ -1,5 +1,6 @@
 // Cloudflare Pages Function - Server-side Dashboard API with D1 Database
 // This uses Cloudflare D1 database to store and retrieve user data
+// Updated: D1 binding active
 
 // Simple session token validation
 async function validateSession(sessionToken, db) {
