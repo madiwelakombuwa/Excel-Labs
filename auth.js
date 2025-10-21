@@ -29,6 +29,12 @@ const dummyUsers = [
         password: 'password123',
         fullName: 'Accounting Manager',
         role: 'Accounting'
+    },
+    {
+        username: 'Accounting2',
+        password: 'password123',
+        fullName: 'Accounting Manager 2',
+        role: 'Accounting'
     }
 ];
 
