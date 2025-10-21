@@ -1,47 +1,57 @@
-// Cloudflare Pages Function - Server-side Dashboard Proxy
-// This keeps the actual Looker Studio URLs hidden from the client
-
-// Secure dashboard URLs stored on server-side only
-const DASHBOARD_URLS = {
-    'user1': 'https://lookerstudio.google.com/embed/reporting/119d56c0-7d73-4bb0-8fb9-d67a5a41361c/page/ecoJD',
-    'user2': 'https://lookerstudio.google.com/embed/reporting/e8a53377-0277-49c2-adb0-f6529163757b/page/gZbyC',
-    'Accounting': 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTJ8q9ySEqesYPjHvEulJE-esmds8i1Qb-pQOpfFX46_0yw1mJz99EzQI_EfZrcKFebl-ajC_7t9r5m/pubhtml?widget=true&chrome=false&single=true',
-    'Accounting2': 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTJ8q9ySEqesYPjHvEulJE-esmds8i1Qb-pQOpfFX46_0yw1mJz99EzQI_EfZrcKFebl-ajC_7t9r5m/pubhtml?widget=true&chrome=false&single=true&gid=1550649253'
-};
-
-// Dummy users database (in production, this would be in a real database)
-const USERS = {
-    'admin': { password: 'admin123', fullName: 'Administrator', role: 'Admin' },
-    'user1': { password: 'password1', fullName: 'John Doe', role: 'User' },
-    'user2': { password: 'password2', fullName: 'Jane Smith', role: 'User' },
-    'Accounting': { password: 'password123', fullName: 'Accounting Manager', role: 'Accounting' },
-    'Accounting2': { password: 'password123', fullName: 'Accounting Manager 2', role: 'Accounting' }
-};
+// Cloudflare Pages Function - Server-side Dashboard API with D1 Database
+// This uses Cloudflare D1 database to store and retrieve user data
 
 // Simple session token validation
-function validateSession(sessionToken) {
+async function validateSession(sessionToken, db) {
     if (!sessionToken) return null;
 
     try {
-        // In a real app, you'd validate JWT or check against a session store
-        // For this demo, we decode the base64 session data
+        // Decode the base64 session data
         const decoded = atob(sessionToken);
         const userData = JSON.parse(decoded);
 
-        // Verify user exists
-        if (USERS[userData.username]) {
-            return userData;
+        // Verify user exists in database
+        const stmt = db.prepare('SELECT * FROM users WHERE username = ? AND is_active = 1');
+        const user = await stmt.bind(userData.username).first();
+
+        if (user) {
+            return {
+                username: user.username,
+                fullName: user.full_name,
+                role: user.role
+            };
         }
     } catch (e) {
+        console.error('Session validation error:', e);
         return null;
     }
 
     return null;
 }
 
+// Update last login time
+async function updateLastLogin(username, db) {
+    try {
+        const stmt = db.prepare(
+            'UPDATE users SET last_login = CURRENT_TIMESTAMP WHERE username = ?'
+        );
+        await stmt.bind(username).run();
+    } catch (e) {
+        console.error('Error updating last login:', e);
+    }
+}
+
 // Main request handler
 export async function onRequest(context) {
-    const { request } = context;
+    const { request, env } = context;
+
+    // Check if D1 database is available
+    if (!env.DB) {
+        return new Response(JSON.stringify({ error: 'Database not configured' }), {
+            status: 500,
+            headers: { 'Content-Type': 'application/json' }
+        });
+    }
 
     // Only allow GET requests
     if (request.method !== 'GET') {
@@ -55,8 +65,8 @@ export async function onRequest(context) {
     const url = new URL(request.url);
     const sessionToken = url.searchParams.get('session') || request.headers.get('X-Session-Token');
 
-    // Validate session
-    const user = validateSession(sessionToken);
+    // Validate session against database
+    const user = await validateSession(sessionToken, env.DB);
 
     if (!user) {
         return new Response(JSON.stringify({ error: 'Unauthorized' }), {
@@ -65,19 +75,23 @@ export async function onRequest(context) {
         });
     }
 
-    // Get dashboard URL for this user
-    const dashboardUrl = DASHBOARD_URLS[user.username];
+    // Get user's dashboard URL from database
+    const stmt = env.DB.prepare('SELECT dashboard_url FROM users WHERE username = ? AND is_active = 1');
+    const result = await stmt.bind(user.username).first();
 
-    if (!dashboardUrl) {
+    if (!result || !result.dashboard_url) {
         return new Response(JSON.stringify({ error: 'No dashboard available for this user' }), {
             status: 404,
             headers: { 'Content-Type': 'application/json' }
         });
     }
 
+    // Update last login timestamp
+    await updateLastLogin(user.username, env.DB);
+
     // Return the dashboard URL (only accessible to authenticated users)
     return new Response(JSON.stringify({
-        dashboardUrl: dashboardUrl,
+        dashboardUrl: result.dashboard_url,
         user: {
             username: user.username,
             fullName: user.fullName,

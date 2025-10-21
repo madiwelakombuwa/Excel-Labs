@@ -1,0 +1,11 @@
+name = "excel-labs"
+compatibility_date = "2024-01-01"
+
+# D1 Database Configuration
+[[d1_databases]]
+binding = "DB"
+database_name = "excel-labs-users"
+database_id = "placeholder-run-wrangler-d1-create"
+
+# Pages Configuration
+pages_build_output_dir = "."
