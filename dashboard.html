@@ -203,41 +203,49 @@
 
     <script src="auth.js"></script>
     <script>
-        // Obfuscation helper function
-        function _0x2a3b(str) {
-            return atob(str);
-        }
-
-        // Protected resource loader
-        function _0x4c5d(userData) {
-            // Encoded dashboard configurations (base64)
-            const _0x8g9h = {
-                'user1': 'aHR0cHM6Ly9sb29rZXJzdHVkaW8uZ29vZ2xlLmNvbS9lbWJlZC9yZXBvcnRpbmcvMTE5ZDU2YzAtN2Q3My00YmIwLThmYjktZDY3YTVhNDEzNjFjL3BhZ2UvZWNvSkQ=',
-                'user2': 'aHR0cHM6Ly9sb29rZXJzdHVkaW8uZ29vZ2xlLmNvbS9lbWJlZC9yZXBvcnRpbmcvZThhNTMzNzctMDI3Ny00OWMyLWFkYjAtZjY1MjkxNjM3NTdiL3BhZ2UvZ1pieUM='
-            };
-
-            const _0x1f2e = _0x8g9h[userData.username];
-
-            return _0x1f2e ? _0x2a3b(_0x1f2e) : null;
-        }
-
         // Dynamic iframe loader
-        function _0x6e7f(container, src) {
+        function createDashboardIframe(container, src) {
             const iframe = document.createElement('iframe');
             iframe.frameBorder = '0';
             iframe.allowFullscreen = true;
             iframe.setAttribute('sandbox', 'allow-storage-access-by-user-activation allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox');
-
-            // Set source after a small delay to avoid initial detection
-            setTimeout(() => {
-                iframe.src = src;
-            }, 100);
+            iframe.src = src;
 
             container.appendChild(iframe);
         }
 
+        // Fetch dashboard URL from server-side proxy
+        async function loadDashboard() {
+            const sessionToken = getSessionToken();
+
+            if (!sessionToken) {
+                console.error('No session token available');
+                return null;
+            }
+
+            try {
+                // Call server-side endpoint - URL is stored securely on server
+                const response = await fetch(`/api/dashboard?session=${encodeURIComponent(sessionToken)}`);
+
+                if (!response.ok) {
+                    if (response.status === 401) {
+                        console.log('Unauthorized - redirecting to login');
+                        window.location.href = 'login.html';
+                        return null;
+                    }
+                    throw new Error(`Server error: ${response.status}`);
+                }
+
+                const data = await response.json();
+                return data.dashboardUrl;
+            } catch (error) {
+                console.error('Failed to load dashboard:', error);
+                return null;
+            }
+        }
+
         // Protect dashboard - redirect to login if not authenticated
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', async function() {
             const user = getCurrentUser();
 
             if (!user) {
@@ -249,16 +257,15 @@
             document.getElementById('userName').textContent = user.fullName;
             document.getElementById('userRole').textContent = user.role;
 
-            // Show Looker Studio dashboard for user1 and user2, default content for others
             const lookerContainer = document.getElementById('lookerStudioContainer');
             const defaultContent = document.getElementById('defaultContent');
 
-            // Attempt to load protected resource for user
-            const resourceUrl = _0x4c5d(user);
+            // Try to load dashboard from server-side proxy
+            const dashboardUrl = await loadDashboard();
 
-            if (resourceUrl) {
+            if (dashboardUrl) {
                 // User has a dashboard - load it
-                _0x6e7f(lookerContainer, resourceUrl);
+                createDashboardIframe(lookerContainer, dashboardUrl);
                 lookerContainer.classList.add('active');
                 defaultContent.classList.add('hidden');
             } else {

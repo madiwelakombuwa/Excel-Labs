@@ -61,6 +61,16 @@ function getCurrentUser() {
     return userJson ? JSON.parse(userJson) : null;
 }
 
+// Get session token for server-side validation
+function getSessionToken() {
+    const userJson = sessionStorage.getItem('loggedInUser');
+    if (!userJson) return null;
+
+    // Create a base64 encoded session token
+    // In production, this would be a signed JWT
+    return btoa(userJson);
+}
+
 // Handle login form submission
 document.addEventListener('DOMContentLoaded', function() {
     const loginForm = document.getElementById('loginForm');
