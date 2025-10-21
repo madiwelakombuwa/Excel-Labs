@@ -170,12 +170,7 @@
 
     <!-- Looker Studio Dashboard for user1 -->
     <div id="lookerStudioContainer" class="looker-studio-container">
-        <iframe
-            src="https://lookerstudio.google.com/embed/reporting/119d56c0-7d73-4bb0-8fb9-d67a5a41361c/page/ecoJD"
-            frameborder="0"
-            allowfullscreen
-            sandbox="allow-storage-access-by-user-activation allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox">
-        </iframe>
+        <!-- Iframe will be loaded dynamically via JavaScript -->
     </div>
 
     <!-- Default content for other users -->
@@ -208,6 +203,36 @@
 
     <script src="auth.js"></script>
     <script>
+        // Obfuscation helper function
+        function _0x2a3b(str) {
+            return atob(str);
+        }
+
+        // Protected resource loader
+        function _0x4c5d(userData) {
+            if (userData.username !== 'user1') return null;
+
+            // Encoded dashboard configuration (base64)
+            const _0x1f2e = 'aHR0cHM6Ly9sb29rZXJzdHVkaW8uZ29vZ2xlLmNvbS9lbWJlZC9yZXBvcnRpbmcvMTE5ZDU2YzAtN2Q3My00YmIwLThmYjktZDY3YTVhNDEzNjFjL3BhZ2UvZWNvSkQ=';
+
+            return _0x2a3b(_0x1f2e);
+        }
+
+        // Dynamic iframe loader
+        function _0x6e7f(container, src) {
+            const iframe = document.createElement('iframe');
+            iframe.frameBorder = '0';
+            iframe.allowFullscreen = true;
+            iframe.setAttribute('sandbox', 'allow-storage-access-by-user-activation allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox');
+
+            // Set source after a small delay to avoid initial detection
+            setTimeout(() => {
+                iframe.src = src;
+            }, 100);
+
+            container.appendChild(iframe);
+        }
+
         // Protect dashboard - redirect to login if not authenticated
         document.addEventListener('DOMContentLoaded', function() {
             const user = getCurrentUser();
@@ -226,9 +251,14 @@
             const defaultContent = document.getElementById('defaultContent');
 
             if (user.username === 'user1') {
-                // Show Looker Studio dashboard
-                lookerContainer.classList.add('active');
-                defaultContent.classList.add('hidden');
+                // Load protected resource
+                const resourceUrl = _0x4c5d(user);
+
+                if (resourceUrl) {
+                    _0x6e7f(lookerContainer, resourceUrl);
+                    lookerContainer.classList.add('active');
+                    defaultContent.classList.add('hidden');
+                }
             } else {
                 // Show default content
                 lookerContainer.classList.remove('active');
