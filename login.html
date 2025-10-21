@@ -103,51 +103,6 @@
             51%, 100% { opacity: 0; }
         }
 
-        .demo-users {
-            margin-top: 30px;
-            padding-top: 20px;
-            border-top: 1px solid #006600;
-        }
-
-        .demo-users h3 {
-            font-size: 13px;
-            color: #00DD00;
-            margin-bottom: 10px;
-            font-weight: normal;
-        }
-
-        .demo-users h3::before {
-            content: '# ';
-            color: #33FF00;
-        }
-
-        .demo-users ul {
-            list-style: none;
-            font-size: 12px;
-            color: #00AA00;
-        }
-
-        .demo-users li {
-            padding: 4px 0;
-            padding-left: 20px;
-        }
-
-        .demo-users li::before {
-            content: '> ';
-            color: #33FF00;
-            margin-left: -20px;
-            margin-right: 8px;
-        }
-
-        .demo-users code {
-            background: #000000;
-            padding: 2px 6px;
-            border: 1px solid #006600;
-            border-radius: 2px;
-            font-family: 'Monaco', 'Menlo', 'Consolas', 'Courier New', monospace;
-            color: #33FF00;
-        }
-
         .hidden {
             display: none;
         }
@@ -163,6 +118,8 @@
             <div class="terminal-line">Initializing secure connection...</div>
             <div class="terminal-line">Connection established.</div>
             <div class="terminal-line">&nbsp;</div>
+            <div class="terminal-line">Type 'help' for available commands.</div>
+            <div class="terminal-line">&nbsp;</div>
         </div>
 
         <div id="inputContainer" class="terminal-input-line">
@@ -177,17 +134,6 @@
             <span class="cursor"></span>
         </div>
 
-        <div class="demo-users">
-            <h3>Available Test Accounts:</h3>
-            <ul>
-                <li><code>admin</code> / <code>admin123</code></li>
-                <li><code>user1</code> / <code>password1</code></li>
-                <li><code>user2</code> / <code>password2</code></li>
-                <li><code>marketing</code> / <code>marketing123</code></li>
-                <li><code>Accounting</code> / <code>password123</code></li>
-                <li><code>Accounting2</code> / <code>password123</code></li>
-            </ul>
-        </div>
     </div>
 
     <script src="auth.js"></script>
@@ -254,10 +200,76 @@
             }
         });
 
+        // Handle CLI commands
+        function handleCommand(cmd) {
+            const command = cmd.toLowerCase();
+
+            // Show what user typed
+            addOutputLine('login: ' + cmd);
+
+            switch(command) {
+                case 'help':
+                    addOutputLine(' ');
+                    addOutputLine('Available commands:');
+                    addOutputLine('  help         - Show this help message');
+                    addOutputLine('  users        - List available test accounts');
+                    addOutputLine('  clear        - Clear terminal screen');
+                    addOutputLine('  version      - Show version information');
+                    addOutputLine(' ');
+                    return true;
+
+                case 'users':
+                case 'list':
+                    addOutputLine(' ');
+                    addOutputLine('Available test accounts:');
+                    addOutputLine('  admin        / admin123');
+                    addOutputLine('  user1        / password1');
+                    addOutputLine('  user2        / password2');
+                    addOutputLine('  marketing    / marketing123');
+                    addOutputLine('  Accounting   / password123');
+                    addOutputLine('  Accounting2  / password123');
+                    addOutputLine(' ');
+                    return true;
+
+                case 'clear':
+                case 'cls':
+                    terminalOutput.innerHTML = '';
+                    addOutputLine('Type \'help\' for available commands.');
+                    addOutputLine(' ');
+                    return true;
+
+                case 'version':
+                case 'ver':
+                    addOutputLine(' ');
+                    addOutputLine('DASH TERMINAL v1.0');
+                    addOutputLine('Secure Login System');
+                    addOutputLine('Powered by Cloudflare D1');
+                    addOutputLine(' ');
+                    return true;
+
+                case 'exit':
+                case 'quit':
+                    addOutputLine(' ');
+                    addOutputLine('Cannot exit login session.', 'terminal-error');
+                    addOutputLine(' ');
+                    return true;
+
+                default:
+                    // Not a command, treat as username
+                    return false;
+            }
+        }
+
         function handleEnter() {
             const value = terminalInput.value.trim();
 
             if (loginState === 'username') {
+                // Check for CLI commands first
+                if (handleCommand(value)) {
+                    clearInput();
+                    return;
+                }
+
                 if (!value) {
                     addOutputLine('login: ', 'terminal-error');
                     addOutputLine('Username cannot be empty', 'terminal-error');
