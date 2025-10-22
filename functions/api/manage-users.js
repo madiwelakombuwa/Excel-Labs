@@ -1,6 +1,8 @@
 // Cloudflare Pages Function - User Management API (Admin Only)
 // CRUD operations for managing users in D1 database
 
+import { updateGoogleSheet } from '../lib/google-sheets.js';
+
 // Validate session and check if user is admin
 async function validateAdminSession(sessionToken, db) {
     if (!sessionToken) return null;
@@ -109,6 +111,9 @@ export async function onRequest(context) {
                 data.dashboard_url || null,
                 data.is_active !== undefined ? data.is_active : 1
             ).run();
+
+            // Update Google Sheet with new username
+            await updateGoogleSheet(data.username, env);
 
             return new Response(JSON.stringify({
                 success: true,
